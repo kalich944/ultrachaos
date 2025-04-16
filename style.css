@@ -1,0 +1,32 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #000;
+}
+
+#container {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  aspect-ratio: 1000 / 1776;
+  background-image: url('back.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+#crystal, #option {
+  position: absolute;
+  width: 100%;
+  left: 0;
+}
+
+#crystal {
+  top: calc(123 / 1776 * 100%);
+}
+
+#option {
+  top: calc(1163 / 1776 * 100%);
+}
