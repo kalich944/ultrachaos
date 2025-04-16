@@ -8,10 +8,10 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #000;
+  background-color: #000; /* Чёрный фон страницы */
 }
 
-/* Контейнер */
+/* Контейнер с фоном */
 #container {
   position: relative;
   width: 100%;
@@ -19,24 +19,29 @@ html, body {
   max-height: 100vh;
   height: auto;
   aspect-ratio: 1000 / 1776;
-  background-color: #000; /* Чёрный фон при масштабировании */
+  background-image: url('back.JPG');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #000; /* Чёрный фон контейнера */
 }
 
-/* Все изображения */
-#background, #crystal, #option {
+/* Изображения поверх фона */
+#crystal, #option {
   position: absolute;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  top: 0;
+  height: auto;
   left: 0;
+  z-index: 10;
+  object-fit: contain;
 }
 
-/* Позиционирование кристалла и опции */
+/* Кристалл на 123px от верха */
 #crystal {
   top: calc(123 / 1776 * 100%);
 }
 
+/* Опция на 1163px от верха */
 #option {
   top: calc(1163 / 1776 * 100%);
 }
