@@ -1,10 +1,10 @@
-/* Фиксируем размеры страницы */
+/* Фиксируем страницу */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden; /* Убираем скролл */
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,25 +14,16 @@ html, body {
 /* Контейнер с фоном */
 #container {
   position: relative;
-  max-width: 100vw; /* Не больше ширины экрана */
-  max-height: 100vh; /* Не больше высоты экрана */
-  width: 1000px; /* Оригинальная ширина */
-  height: 1776px; /* Оригинальная высота */
+  width: 100%;
+  max-width: 1000px;
+  max-height: 100vh;
+  height: auto;
+  aspect-ratio: 1000 / 1776;
   background-image: url('back.JPG');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  transform: scale(1); /* Для масштабирования */
-  transform-origin: center; /* Центр масштабирования */
-}
-
-/* Адаптация для маленьких экранов */
-@media screen and (max-width: 1000px), (max-height: 1776px) {
-  #container {
-    width: 100vw;
-    height: auto;
-    aspect-ratio: 1000 / 1776;
-  }
+  background-color: rgba(0, 255, 0, 0.2); /* Отладочный зелёный фон */
 }
 
 /* Изображения поверх фона */
