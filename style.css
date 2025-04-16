@@ -1,9 +1,9 @@
-/* Обеспечиваем полную высоту и центрирование */
+/* Полная высота и центрирование */
 body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh; /* Минимальная высота для мобильных */
+  min-height: 100vh;
   margin: 0;
   padding: 0;
   background-color: #000;
@@ -13,10 +13,8 @@ body {
 /* Контейнер с фоном */
 #container {
   position: relative;
-  width: 100%;
-  max-width: 1000px; /* Максимальная ширина */
-  height: auto; /* Высота подстраивается */
-  max-height: 100vh; /* Не больше высоты экрана */
+  width: min(100vw, calc(100vh * 1000 / 1776)); /* Масштабируем по меньшему из ширины или высоты */
+  height: auto;
   aspect-ratio: 1000 / 1776; /* Сохраняем пропорции */
   background-image: url('back.JPG');
   background-size: contain;
@@ -29,7 +27,7 @@ body {
   position: absolute;
   width: 100%;
   left: 0;
-  z-index: 10; /* Поверх фона */
+  z-index: 10;
 }
 
 /* Кристалл на 123px от верха */
@@ -40,11 +38,4 @@ body {
 /* Опция на 1163px от верха */
 #option {
   top: calc(1163 / 1776 * 100%);
-}
-
-/* Мобильные устройства */
-@media screen and (max-width: 1000px) {
-  #container {
-    width: 100vw; /* Полная ширина экрана */
-  }
 }
