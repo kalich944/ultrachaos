@@ -1,4 +1,4 @@
-/* Центрируем контейнер на экране */
+/* Центрируем контейнер */
 body {
   display: flex;
   justify-content: center;
@@ -8,30 +8,31 @@ body {
   background-color: #000;
 }
 
-/* Контейнер с фоновым изображением back.jpg */
+/* Контейнер с фоном */
 #container {
   position: relative;
   width: 100%;
   max-width: 1000px;
   aspect-ratio: 1000 / 1776;
-  background-image: url('back.jpg');
+  background-image: url('back.JPG');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
-/* Кристалл и опция — поверх фона */
+/* Изображения поверх фона */
 #crystal, #option {
   position: absolute;
   width: 100%;
   left: 0;
+  z-index: 10; /* Гарантирует отображение поверх фона */
 }
 
-/* Кристалл на 123px от верха фона */
+/* Кристалл на 123px от верха */
 #crystal {
   top: calc(123 / 1776 * 100%);
 }
 
-/* Опция боя на 1163px от верха фона */
+/* Опция на 1163px от верха */
 #option {
   top: calc(1163 / 1776 * 100%);
 }
