@@ -1,51 +1,38 @@
-/* Фиксируем страницу */
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
+/* Центрируем контейнер */
+body {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh;
+  margin: 0;
   background-color: #000;
 }
 
-/* Контейнер */
+/* Контейнер с фоном */
 #container {
   position: relative;
   width: 100%;
   max-width: 1000px;
-  max-height: 100vh;
-  height: auto;
   aspect-ratio: 1000 / 1776;
-  background-color: #000;
+  background-image: url('back.JPG');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
-/* Изображения */
-#background, #crystal, #option {
+/* Изображения поверх фона */
+#crystal, #option {
   position: absolute;
   width: 100%;
-  height: 100%;
-  top: 0;
   left: 0;
-  object-fit: contain;
+  z-index: 10; /* Гарантирует отображение поверх фона */
 }
 
-/* Позиции кристалла и опции */
+/* Кристалл на 123px от верха */
 #crystal {
   top: calc(123 / 1776 * 100%);
 }
 
+/* Опция на 1163px от верха */
 #option {
   top: calc(1163 / 1776 * 100%);
-}
-
-/* Медиа-запрос для планшетов и телефонов */
-@media screen and (max-height: 1776px) {
-  #container {
-    height: 100vh;
-    width: auto;
-    max-width: 100vw;
-  }
 }
