@@ -12,11 +12,13 @@ body {
 #container {
   position: relative;
   width: 100%;
-  max-width: 1000px;
-  aspect-ratio: 1000 / 1776;
+  max-width: 100vw; /* Ограничиваем ширину по экрану */
+  max-height: 100vh; /* Ограничиваем высоту по экрану */
+  aspect-ratio: 1000 / 1776; /* Сохраняем пропорции */
   background-image: url('back.JPG');
   background-size: contain;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
 /* Изображения поверх фона */
