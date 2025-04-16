@@ -1,3 +1,4 @@
+/* Центрируем контейнер на экране */
 body {
   display: flex;
   justify-content: center;
@@ -7,6 +8,7 @@ body {
   background-color: #000;
 }
 
+/* Контейнер с фоновым изображением back.jpg */
 #container {
   position: relative;
   width: 100%;
@@ -17,16 +19,19 @@ body {
   background-repeat: no-repeat;
 }
 
+/* Кристалл и опция — поверх фона */
 #crystal, #option {
   position: absolute;
   width: 100%;
   left: 0;
 }
 
+/* Кристалл на 123px от верха фона */
 #crystal {
   top: calc(123 / 1776 * 100%);
 }
 
+/* Опция боя на 1163px от верха фона */
 #option {
   top: calc(1163 / 1776 * 100%);
 }
