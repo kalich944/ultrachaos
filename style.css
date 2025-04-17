@@ -30,7 +30,7 @@ html, body {
   position: absolute;
   top: 10px;
   left: 10px;
-  color: #808080 !important;
+  color: #808080 !important; /* Серый цвет */
   font-size: 12px;
   font-family: Arial, sans-serif;
   z-index: 1000;
@@ -46,8 +46,6 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   object-fit: contain;
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
 }
 
 /* Опция боя */
@@ -59,19 +57,12 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   object-fit: contain;
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Скрытие при анимации */
-#crystal.hidden, #option.hidden {
-  opacity: 0;
 }
 
 /* Для экранов с высотой меньше 1529px */
 @media screen and (max-height: 1529px) {
   #container {
-    height: calc(100vh - 80px);
+    height: calc(100vh - 80px); /* Запас для Telegram WebView */
     width: auto;
     max-width: 100vw;
     max-height: 100vh;
