@@ -13,26 +13,27 @@ body {
   position: relative;
   width: 100%;
   max-width: 1000px;
-  aspect-ratio: 1000 / 1776;
-  background-image: url('back.JPG');
+  aspect-ratio: 1000 / 1529; /* Пропорции фона 1000x1529 */
+  background-image: url('back.jpg');
   background-size: contain;
   background-repeat: no-repeat;
+  background-position: center;
 }
 
-/* Изображения поверх фона */
-#crystal, #option {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  z-index: 10; /* Гарантирует отображение поверх фона */
-}
-
-/* Кристалл на 123px от верха */
+/* Кристалл */
 #crystal {
-  top: calc(123 / 1776 * 100%);
+  position: absolute;
+  width: 89.3%; /* 893 / 1000 = 89.3% */
+  top: 6.15%; /* 94 / 1529 ≈ 6.15% */
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* Опция на 1163px от верха */
+/* Опция боя */
 #option {
-  top: calc(1163 / 1776 * 100%);
+  position: absolute;
+  width: 93%; /* 930 / 1000 = 93% */
+  top: 66.42%; /* 1016 / 1529 ≈ 66.42% */
+  left: 50%;
+  transform: translateX(-50%);
 }
