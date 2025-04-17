@@ -30,10 +30,11 @@ html, body {
   position: absolute;
   top: 10px;
   left: 10px;
-  color: #fff;
+  color: #808080; /* Серый цвет */
   font-size: 12px;
   font-family: Arial, sans-serif;
   z-index: 1000;
+  pointer-events: none; /* Не влияет на клики */
 }
 
 /* Кристалл */
@@ -59,7 +60,7 @@ html, body {
 /* Для экранов с высотой меньше 1529px */
 @media screen and (max-height: 1529px) {
   #container {
-    height: calc(100vh - 50px); /* Запас для Telegram панелей */
+    height: calc(100vh - 60px); /* Запас для Telegram WebView */
     width: auto;
     max-width: 100vw;
     max-height: 100vh;
