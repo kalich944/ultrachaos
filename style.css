@@ -1,70 +1,73 @@
-/* Фиксируем страницу */
-html, body {
+body {
+  background: #000;
+  color: #808080;
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.header-image {
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
+  max-width: 800px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.gallery img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #808080;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
   justify-content: center;
   align-items: center;
-  background-color: #000;
 }
 
-/* Контейнер с фоном */
-#container {
-  position: relative;
-  width: 100%;
-  max-width: 1000px;
-  height: auto;
-  aspect-ratio: 1000 / 1529;
-  background-image: url('back.jpg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #000;
+.modal-content {
+  max-width: 90%;
+  max-height: 90%;
 }
 
-/* Версия приложения */
-#version {
+.close {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #808080 !important; /* Серый цвет */
-  font-size: 12px;
-  font-family: Arial, sans-serif;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-/* Кристалл */
-#crystal {
-  position: absolute;
-  width: 89.3%; /* 893 / 1000 = 89.3% */
-  height: auto;
-  top: 6.15%; /* 94 / 1529 ≈ 6.15% */
-  left: 50%;
-  transform: translateX(-50%);
-  object-fit: contain;
-}
-
-/* Опция боя */
-#option {
-  position: absolute;
-  width: 93%; /* 930 / 1000 = 93% */
-  height: auto;
-  top: 66.42%; /* 1016 / 1529 ≈ 66.42% */
-  left: 50%;
-  transform: translateX(-50%);
-  object-fit: contain;
-}
-
-/* Для экранов с высотой меньше 1529px */
-@media screen and (max-height: 1529px) {
-  #container {
-    height: calc(100vh - 80px); /* Запас для Telegram WebView */
-    width: auto;
-    max-width: 100vw;
-    max-height: 100vh;
-  }
+  top: 20px;
+  right: 30px;
+  color: #fff;
+  font-size: 40px;
+  cursor: pointer;
 }
