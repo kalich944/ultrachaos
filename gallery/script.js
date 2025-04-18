@@ -7,13 +7,13 @@ const fullscreenImg = document.getElementById('fullscreen-img');
 window.Telegram.WebApp.ready();
 
 // Проверка существования файла
-async function checkImageExists(url) {
-  try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
-  }
+function checkImageExists(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
 }
 
 // Создание галереи
@@ -28,6 +28,7 @@ cards.forEach(async (num) => {
   // Проверяем наличие dN.jpg
   const detailImage = `d${num}.jpg`;
   const exists = await checkImageExists(detailImage);
+  console.log(`Карта ${num}: d${num}.jpg существует? ${exists}`);
 
   if (exists) {
     card.addEventListener('click', () => {
