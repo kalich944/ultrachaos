@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Ultrachaos Gallery</title>
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Галерея Ultrachaos</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div id="gallery">
-    <!-- Карты добавляются через JS -->
+  <div class="container">
+    <img src="top.jpg" alt="Ultrachaos Header" class="header-image" />
+    <div class="gallery" id="gallery"></div>
+    <img src="pam.jpg" alt="Pam Image" class="pam-image" />
+    <div class="gallery" id="p-gallery"></div>
   </div>
+
   <div id="fullscreen" class="hidden">
-    <img id="fullscreen-img" src="" alt="Полноэкранная картинка">
+    <img id="fullscreen-img" src="" alt="Полноэкранная картинка" />
   </div>
-  <script src="./script.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>

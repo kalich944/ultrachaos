@@ -1,4 +1,3 @@
-const cards = Array.from({ length: 20 }, (_, i) => i + 1);
 const gallery = document.getElementById('gallery');
 const fullscreen = document.getElementById('fullscreen');
 const fullscreenImg = document.getElementById('fullscreen-img');
@@ -8,47 +7,37 @@ window.Telegram.WebApp.ready();
 function checkImageExists(url) {
   return new Promise((resolve) => {
     const img = new Image();
-    const timeout = setTimeout(() => resolve(false), 5000);
-    img.onload = () => {
-      clearTimeout(timeout);
-      resolve(true);
-    };
-    img.onerror = () => {
-      clearTimeout(timeout);
-      resolve(false);
-    };
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
     img.src = url;
   });
 }
 
-cards.forEach(async (num) => {
-  const card = document.createElement('div');
-  card.className = 'card';
-  const img = document.createElement('img');
-  img.src = `${num}.jpg`; // Картинки в этой же папке
-  img.alt = `Карта ${num}`;
-  card.appendChild(img);
+const loadImages = async () => {
+  for (let i = 1; i <= 100; i++) {
+    const img = document.createElement('img');
+    img.src = `${i}.jpg`;
+    img.alt = `Карта ${i}`;
+    img.loading = 'lazy';
 
-  const detailImage = `d${num}.jpg`;
-  const exists = await checkImageExists(detailImage);
+    const detailSrc = `d${i}.jpg`;
+    const exists = await checkImageExists(detailSrc);
 
-  if (exists) {
-    card.addEventListener('click', () => {
-      checkImageExists(detailImage).then((stillExists) => {
-        if (stillExists) {
-          fullscreenImg.src = detailImage;
-          fullscreen.classList.remove('hidden');
-        }
+    if (exists) {
+      img.addEventListener('click', () => {
+        fullscreenImg.src = detailSrc;
+        fullscreen.classList.remove('hidden');
       });
-    });
-  } else {
-    card.classList.add('disabled');
-  }
+    }
 
-  gallery.appendChild(card);
-});
+    img.onerror = () => img.remove();
+    gallery.appendChild(img);
+  }
+};
 
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
 });
+
+loadImages();
