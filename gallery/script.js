@@ -25,10 +25,10 @@ cards.forEach(async (num) => {
   img.alt = `Карта ${num}`;
   card.appendChild(img);
 
-  // Проверяем наличие dN.jpg
-  const detailImage = `d${num}.jpg`;
+  // Проверяем наличие dN.jpg в папке gallery
+  const detailImage = `gallery/d${num}.jpg`;
   const exists = await checkImageExists(detailImage);
-  console.log(`Карта ${num}: d${num}.jpg существует? ${exists}`);
+  console.log(`Карта ${num}: ${detailImage} существует? ${exists}`);
 
   if (exists) {
     card.addEventListener('click', () => {
