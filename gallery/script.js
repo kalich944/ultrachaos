@@ -3,10 +3,8 @@ const gallery = document.getElementById('gallery');
 const fullscreen = document.getElementById('fullscreen');
 const fullscreenImg = document.getElementById('fullscreen-img');
 
-// Инициализация Telegram Mini App
 window.Telegram.WebApp.ready();
 
-// Проверка существования файла с таймаутом
 function checkImageExists(url) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -24,18 +22,16 @@ function checkImageExists(url) {
   });
 }
 
-// Создание галереи
 cards.forEach(async (num) => {
   const card = document.createElement('div');
   card.className = 'card';
   const img = document.createElement('img');
-  img.src = `gallery/${num}.jpg`; // <== исправлено
+  img.src = `${num}.jpg`; // <== без gallery/
   img.alt = `Карта ${num}`;
   card.appendChild(img);
 
-  const detailImage = `gallery/d${num}.jpg`; // <== исправлено
+  const detailImage = `d${num}.jpg`; // <== без gallery/
   const exists = await checkImageExists(detailImage);
-  console.log(`Карта ${num}: ${detailImage} существует? ${exists}`);
 
   if (exists) {
     card.addEventListener('click', () => {
@@ -43,9 +39,6 @@ cards.forEach(async (num) => {
         if (stillExists) {
           fullscreenImg.src = detailImage;
           fullscreen.classList.remove('hidden');
-          console.log(`Открыта: ${detailImage}`);
-        } else {
-          console.log(`Ошибка: ${detailImage} не найдена при клике`);
         }
       });
     });
@@ -56,9 +49,7 @@ cards.forEach(async (num) => {
   gallery.appendChild(card);
 });
 
-// Закрытие полноэкранного изображения
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
-  console.log('Полноэкранный режим закрыт');
 });
