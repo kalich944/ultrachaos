@@ -1,30 +1,48 @@
+const cards = Array.from({length: 20}, (_, i) => i + 1);
 const gallery = document.getElementById('gallery');
-const pGallery = document.getElementById('p-gallery');
+const fullscreen = document.getElementById('fullscreen');
+const fullscreenImg = document.getElementById('fullscreen-img');
 
-// Подгружаем карты (1.jpg, 2.jpg и т.д.)
-const loadImages = () => {
-  for (let i = 1; i <= 100; i++) {
-    const img = document.createElement('img');
-    img.src = `${i}.jpg`;
-    img.alt = `Карта ${i}`;
-    img.loading = 'lazy';
-    img.onerror = () => img.remove(); // Удаляем, если файла нет
-    gallery.appendChild(img);
+// Инициализация Telegram Mini App
+window.Telegram.WebApp.ready();
+
+// Проверка существования файла
+async function checkImageExists(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
   }
-};
+}
 
-// Подгружаем P-карты (p1.jpg, p2.jpg и т.д.)
-const loadPImages = () => {
-  for (let i = 1; i <= 100; i++) {
-    const img = document.createElement('img');
-    img.src = `p${i}.jpg`;
-    img.alt = `P-карта ${i}`;
-    img.loading = 'lazy';
-    img.onerror = () => img.remove(); // Удаляем, если файла нет
-    pGallery.appendChild(img);
+// Создание галереи
+cards.forEach(async (num) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const img = document.createElement('img');
+  img.src = `${num}.jpg`;
+  img.alt = `Карта ${num}`;
+  card.appendChild(img);
+
+  // Проверяем наличие dN.jpg
+  const detailImage = `d${num}.jpg`;
+  const exists = await checkImageExists(detailImage);
+
+  if (exists) {
+    card.addEventListener('click', () => {
+      fullscreenImg.src = detailImage;
+      fullscreen.classList.remove('hidden');
+    });
+  } else {
+    card.className = 'card disabled';
   }
-};
 
-// Загружаем изображения при загрузке страницы
-loadImages();
-loadPImages();
+  gallery.appendChild(card);
+});
+
+// Закрытие полноэкранного изображения
+fullscreen.addEventListener('click', () => {
+  fullscreen.classList.add('hidden');
+  fullscreenImg.src = '';
+});
