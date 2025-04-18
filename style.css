@@ -25,18 +25,6 @@ html, body {
   background-color: #000;
 }
 
-/* Версия приложения */
-#version {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #808080 !important; /* Серый цвет */
-  font-size: 12px;
-  font-family: Arial, sans-serif;
-  z-index: 1000;
-  pointer-events: none;
-}
-
 /* Кристалл */
 #crystal {
   position: absolute;
