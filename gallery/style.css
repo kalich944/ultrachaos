@@ -12,7 +12,7 @@ body {
   text-align: center;
 }
 
-.header-image {
+.header-image, .pam-image {
   width: 100%;
   max-width: none;
   height: auto;
@@ -25,6 +25,7 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   padding: 0 10px;
+  margin-bottom: 10px;
 }
 
 .gallery img {
