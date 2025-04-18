@@ -6,13 +6,21 @@ const fullscreenImg = document.getElementById('fullscreen-img');
 // Инициализация Telegram Mini App
 window.Telegram.WebApp.ready();
 
-// Проверка существования файла
+// Проверка существования файла с таймаутом
 function checkImageExists(url) {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
+    const timeout = setTimeout(() => resolve(false), 5000); // Таймаут 5 сек
+    img.onload = () => {
+      clearTimeout(timeout);
+      resolve(true);
+    };
+    img.onerror = () => {
+      clearTimeout(timeout);
+      resolve(false);
+    };
     img.src = url;
+    console.log(`Проверяем: ${url}`);
   });
 }
 
@@ -32,8 +40,16 @@ cards.forEach(async (num) => {
 
   if (exists) {
     card.addEventListener('click', () => {
-      fullscreenImg.src = detailImage;
-      fullscreen.classList.remove('hidden');
+      // Двойная проверка перед открытием
+      checkImageExists(detailImage).then((stillExists) => {
+        if (stillExists) {
+          fullscreenImg.src = detailImage;
+          fullscreen.classList.remove('hidden');
+          console.log(`Открыта: ${detailImage}`);
+        } else {
+          console.log(`Ошибка: ${detailImage} не найдена при клике`);
+        }
+      });
     });
   } else {
     card.className = 'card disabled';
@@ -46,4 +62,5 @@ cards.forEach(async (num) => {
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
+  console.log('Полноэкранный режим закрыт');
 });
