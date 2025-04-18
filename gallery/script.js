@@ -18,7 +18,6 @@ function checkImageExists(url) {
       resolve(false);
     };
     img.src = url;
-    console.log(`Проверяем: ${url}`);
   });
 }
 
@@ -26,11 +25,11 @@ cards.forEach(async (num) => {
   const card = document.createElement('div');
   card.className = 'card';
   const img = document.createElement('img');
-  img.src = `${num}.jpg`; // <== без gallery/
+  img.src = `${num}.jpg`; // Картинки в этой же папке
   img.alt = `Карта ${num}`;
   card.appendChild(img);
 
-  const detailImage = `d${num}.jpg`; // <== без gallery/
+  const detailImage = `d${num}.jpg`;
   const exists = await checkImageExists(detailImage);
 
   if (exists) {
@@ -43,7 +42,7 @@ cards.forEach(async (num) => {
       });
     });
   } else {
-    card.className = 'card disabled';
+    card.classList.add('disabled');
   }
 
   gallery.appendChild(card);
