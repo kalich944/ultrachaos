@@ -5,7 +5,6 @@ const closeModal = document.querySelector('.close');
 
 // Подгружаем карты (1.jpg, 2.jpg и т.д.)
 const loadImages = () => {
-  // Карты лежат прямо в gallery/
   for (let i = 1; i <= 100; i++) {
     const img = document.createElement('img');
     img.src = `${i}.jpg`;

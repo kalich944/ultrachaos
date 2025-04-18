@@ -1,5 +1,5 @@
 body {
-  background: #000;
+  background: #fff;
   color: #808080;
   font-family: Arial, sans-serif;
   margin: 0;
@@ -7,23 +7,24 @@ body {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  padding: 0;
   text-align: center;
 }
 
 .header-image {
   width: 100%;
-  max-width: 800px;
+  max-width: none;
   height: auto;
-  margin-bottom: 20px;
+  display: block;
+  margin-bottom: 10px;
 }
 
 .gallery {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  padding: 0 10px;
 }
 
 .gallery img {
@@ -31,18 +32,6 @@ body {
   height: auto;
   border: 1px solid #808080;
   cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery {
-    grid-template-columns: 1fr;
-  }
 }
 
 .modal {
