@@ -30,7 +30,6 @@ body {
 .gallery img {
   width: 100%;
   height: auto;
-  border: 1px solid #808080;
   cursor: pointer;
 }
 
