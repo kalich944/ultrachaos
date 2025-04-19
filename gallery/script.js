@@ -10,6 +10,7 @@ function checkImageExists(url) {
     img.onload = () => resolve(true);
     img.onerror = () => resolve(false);
     img.src = url;
+    console.log(`Проверяем: ${url}`);
   });
 }
 
@@ -26,6 +27,7 @@ const loadImages = async () => {
 
     const detailSrc = `gallery/d${i}.jpg`;
     const exists = await checkImageExists(detailSrc);
+    console.log(`Карта ${i}: ${detailSrc} существует? ${exists}`);
 
     if (exists) {
       // Добавляем corner.jpg из папки gallery
@@ -38,10 +40,14 @@ const loadImages = async () => {
       img.addEventListener('click', () => {
         fullscreenImg.src = detailSrc;
         fullscreen.classList.remove('hidden');
+        console.log(`Открыта: ${detailSrc}`);
       });
     }
 
-    img.onerror = () => cardContainer.remove();
+    img.onerror = () => {
+      console.log(`Ошибка загрузки: gallery/${i}.jpg`);
+      cardContainer.remove();
+    };
     cardContainer.appendChild(img);
     gallery.appendChild(cardContainer);
   }
@@ -50,6 +56,7 @@ const loadImages = async () => {
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
+  console.log('Полноэкранный режим закрыт');
 });
 
 loadImages();
