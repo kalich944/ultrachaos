@@ -29,10 +29,24 @@ body {
   margin-bottom: 10px;
 }
 
-.gallery img {
+.gallery img.card-image {
   width: 100%;
   height: auto;
   cursor: pointer;
+}
+
+.gallery .card-container {
+  position: relative;
+  width: 100%;
+}
+
+.gallery .corner-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12.5%;
+  height: auto;
+  z-index: 1;
 }
 
 #fullscreen {
