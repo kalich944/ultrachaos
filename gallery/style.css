@@ -63,7 +63,6 @@ body {
   left: 0;
   width: 12.5%;
   height: auto;
-  aspect-ratio: 1 / 1;
   object-fit: contain;
   pointer-events: none;
 }
