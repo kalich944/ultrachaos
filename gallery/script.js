@@ -67,13 +67,9 @@ async function loadSeriesGallery(prefix, galleryId) {
   const seriesGallery = document.getElementById(galleryId);
   for (let i = 1; i <= 100; i++) {
     const url = `${prefix}${i}.jpg`;
+    const detailUrl = `d${prefix}${i}.jpg`;
     if (await checkImageExists(url)) {
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = `${prefix.toUpperCase()} ${i}`;
-      img.className = 'card-image';
-      img.loading = 'lazy';
-      seriesGallery.appendChild(img);
+      createCard(url, detailUrl, seriesGallery);
     } else {
       break;
     }
