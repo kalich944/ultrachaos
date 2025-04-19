@@ -29,31 +29,12 @@ body {
   margin-bottom: 10px;
 }
 
-/* Карточка с изображением и уголком */
-.card-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.card-wrapper img:first-child {
+.gallery img {
   width: 100%;
   height: auto;
-  display: block;
   cursor: pointer;
 }
 
-/* Уголок */
-.corner-icon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 12.5%;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-/* Полноэкранный режим */
 #fullscreen {
   position: fixed;
   top: 0;
