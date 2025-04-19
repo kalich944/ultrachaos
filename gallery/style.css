@@ -13,7 +13,10 @@ body {
 }
 
 .header-image,
-.pam-image {
+.pam-image,
+.archive-image,
+.weapon-image,
+.end-image {
   width: 100%;
   max-width: none;
   height: auto;
