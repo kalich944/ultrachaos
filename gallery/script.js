@@ -19,18 +19,18 @@ const loadImages = async () => {
     cardContainer.className = 'card-container';
 
     const img = document.createElement('img');
-    img.src = `${i}.jpg`;
+    img.src = `gallery/${i}.jpg`;
     img.alt = `Карта ${i}`;
     img.className = 'card-image';
     img.loading = 'lazy';
 
-    const detailSrc = `d${i}.jpg`;
+    const detailSrc = `gallery/d${i}.jpg`;
     const exists = await checkImageExists(detailSrc);
 
     if (exists) {
-      // Добавляем corner.jpg для карт с dN.jpg
+      // Добавляем corner.jpg из папки gallery
       const cornerImg = document.createElement('img');
-      cornerImg.src = 'corner.jpg';
+      cornerImg.src = 'gallery/corner.jpg';
       cornerImg.alt = 'Уголок';
       cornerImg.className = 'corner-image';
       cardContainer.appendChild(cornerImg);
