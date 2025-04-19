@@ -46,7 +46,7 @@ body {
 .gallery .corner-image {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   width: 12.5%;
   height: auto;
   z-index: 1;
