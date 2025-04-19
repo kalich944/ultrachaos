@@ -20,19 +20,19 @@ const loadImages = async () => {
     cardContainer.className = 'card-container';
 
     const img = document.createElement('img');
-    img.src = `gallery/${i}.jpg`;
+    img.src = `${i}.jpg`;
     img.alt = `Карта ${i}`;
     img.className = 'card-image';
     img.loading = 'lazy';
 
-    const detailSrc = `gallery/d${i}.jpg`;
+    const detailSrc = `d${i}.jpg`;
     const exists = await checkImageExists(detailSrc);
     console.log(`Карта ${i}: ${detailSrc} существует? ${exists}`);
 
     if (exists) {
-      // Добавляем corner.jpg из папки gallery
+      // Добавляем corner.jpg
       const cornerImg = document.createElement('img');
-      cornerImg.src = 'gallery/corner.jpg';
+      cornerImg.src = 'corner.jpg';
       cornerImg.alt = 'Уголок';
       cornerImg.className = 'corner-image';
       cardContainer.appendChild(cornerImg);
@@ -45,7 +45,7 @@ const loadImages = async () => {
     }
 
     img.onerror = () => {
-      console.log(`Ошибка загрузки: gallery/${i}.jpg`);
+      console.log(`Ошибка загрузки: ${i}.jpg`);
       cardContainer.remove();
     };
     cardContainer.appendChild(img);
