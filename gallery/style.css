@@ -57,3 +57,13 @@ body {
   max-height: 90%;
   object-fit: contain;
 }
+.corner-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  pointer-events: none;
+}
+

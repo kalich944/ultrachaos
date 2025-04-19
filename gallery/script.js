@@ -23,15 +23,25 @@ const loadImages = async () => {
     const detailSrc = `d${i}.jpg`;
     const exists = await checkImageExists(detailSrc);
 
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(img);
+
     if (exists) {
       img.addEventListener('click', () => {
         fullscreenImg.src = detailSrc;
         fullscreen.classList.remove('hidden');
       });
+
+      const corner = document.createElement('img');
+      corner.src = 'corner.jpg';
+      corner.alt = 'Уголок';
+      corner.className = 'corner-icon';
+      wrapper.appendChild(corner);
     }
 
-    img.onerror = () => img.remove();
-    gallery.appendChild(img);
+    img.onerror = () => wrapper.remove();
+    gallery.appendChild(wrapper);
   }
 };
 
