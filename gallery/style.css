@@ -35,6 +35,23 @@ body {
   cursor: pointer;
 }
 
+/* Оболочка каждой карточки */
+.card-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Уголок */
+.corner-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12.5%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 /* Полноэкранный режим */
 #fullscreen {
   position: fixed;
@@ -57,15 +74,4 @@ body {
   max-width: 90%;
   max-height: 90%;
   object-fit: contain;
-}
-
-/* Уголок */
-.corner-icon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 12.5%;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
 }
