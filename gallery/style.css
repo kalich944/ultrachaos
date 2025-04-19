@@ -29,16 +29,17 @@ body {
   margin-bottom: 10px;
 }
 
-.gallery img {
-  width: 100%;
-  height: auto;
-  cursor: pointer;
-}
-
-/* Оболочка каждой карточки */
+/* Карточка с изображением и уголком */
 .card-wrapper {
   position: relative;
   width: 100%;
+}
+
+.card-wrapper img:first-child {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
 }
 
 /* Уголок */

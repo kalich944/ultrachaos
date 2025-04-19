@@ -15,33 +15,33 @@ function checkImageExists(url) {
 
 const loadImages = async () => {
   for (let i = 1; i <= 100; i++) {
-    const cardWrapper = document.createElement('div');
-    cardWrapper.className = 'card-wrapper';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card-wrapper';
 
     const img = document.createElement('img');
     img.src = `${i}.jpg`;
     img.alt = `Карта ${i}`;
     img.loading = 'lazy';
+    wrapper.appendChild(img);
 
     const detailSrc = `d${i}.jpg`;
     const exists = await checkImageExists(detailSrc);
 
     if (exists) {
-      img.addEventListener('click', () => {
-        fullscreenImg.src = detailSrc;
-        fullscreen.classList.remove('hidden');
-      });
-
       const corner = document.createElement('img');
       corner.src = 'corner.jpg';
       corner.alt = 'Уголок';
       corner.className = 'corner-icon';
-      cardWrapper.appendChild(corner);
+      wrapper.appendChild(corner);
+
+      img.addEventListener('click', () => {
+        fullscreenImg.src = detailSrc;
+        fullscreen.classList.remove('hidden');
+      });
     }
 
-    img.onerror = () => cardWrapper.remove();
-    cardWrapper.appendChild(img);
-    gallery.appendChild(cardWrapper);
+    img.onerror = () => wrapper.remove();
+    gallery.appendChild(wrapper);
   }
 };
 
