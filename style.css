@@ -25,6 +25,17 @@ html, body {
   background-color: #000;
 }
 
+/* Начальный экран */
+#opening-screen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: contain;
+  z-index: 2; /* Поверх других элементов */
+}
+
 /* Кристалл */
 #crystal {
   position: absolute;
@@ -34,6 +45,7 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   object-fit: contain;
+  display: none; /* Скрыт изначально */
 }
 
 /* Опция боя */
@@ -45,6 +57,7 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   object-fit: contain;
+  display: none; /* Скрыт изначально */
 }
 
 /* Для экранов с высотой меньше 1529px */
