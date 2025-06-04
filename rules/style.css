@@ -16,5 +16,5 @@ body {
   width: 100%; /* Ширина на весь экран */
   height: auto;
   margin-bottom: 0; /* Изображения вплотную */
-  border: 2px solid #333;
+  border: none; /* Убрана обводка */
 }
