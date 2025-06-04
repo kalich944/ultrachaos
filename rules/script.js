@@ -1,6 +1,6 @@
 const imageContainer = document.getElementById('imageContainer');
-// Определяем максимальный номер изображения (настрой под себя)
-const maxImageNumber = 10; // Измени на максимальный номер (например, 20, если у тебя 20 изображений)
+// Определяем максимальный номер изображения
+const maxImageNumber = 7; // Теперь 7 изображений
 
 // Функция для добавления изображений
 function loadImages() {
