@@ -15,6 +15,6 @@ body {
 #imageContainer img {
   width: 100%; /* Ширина на весь экран */
   height: auto;
-  margin-bottom: 20px; /* Зазор около 5 мм (20px) */
+  margin-bottom: 0px; /* Зазор около 5 мм (20px) */
   border: none; /* Обводка убрана */
 }
