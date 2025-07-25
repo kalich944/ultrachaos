@@ -17,7 +17,7 @@ function checkImageExists(url) {
 }
 
 async function loadMainGallery() {
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= 200; i++) {
     const baseUrl = `${i}.jpg`;
     if (await checkImageExists(baseUrl)) {
       createCard(baseUrl, `d${i}.jpg`, gallery);
