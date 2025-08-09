@@ -1,5 +1,5 @@
 const crystals = Array.from({length: 8}, (_, i) => `c${i+1}.JPG`);
-const options = Array.from({length: 20}, (_, i) => `${i+1}.jpg`);
+const options = Array.from({length: 18}, (_, i) => `${i+1}.jpg`);
 
 const container = document.getElementById('container');
 const openingScreen = document.getElementById('opening-screen');
