@@ -6,7 +6,7 @@ const maxImageNumber = 11; // Теперь 9 изображений
 function loadImages() {
   for (let i = 1; i <= maxImageNumber; i++) {
     const img = document.createElement('img');
-    img.src = `${i}.jpg`; // Путь относительный, так как изображения в той же папке
+    img.src = `${i}.png`; // Путь относительный, так как изображения в той же папке
     img.alt = `Правило ${i}`;
     imageContainer.appendChild(img);
   }
