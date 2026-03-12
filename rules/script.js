@@ -1,38 +1,43 @@
 const imageContainer = document.getElementById('imageContainer');
-// Определяем максимальный номер изображения
-const maxImageNumber = 9; // Теперь 9 изображений
+const maxImageNumber = 9; // количество изображений
 
-// Функция для добавления изображений
+// Функция загрузки всех изображений, возвращает Promise, который резолвится, когда все img загружены
 function loadImages() {
+  const promises = [];
   for (let i = 1; i <= maxImageNumber; i++) {
     const img = document.createElement('img');
-    img.src = `${i}.png`; // Путь относительный, так как изображения в той же папке
+    img.src = `${i}.png`;
     img.alt = `Правило ${i}`;
     imageContainer.appendChild(img);
+
+    // Создаём промис на загрузку каждого изображения
+    const promise = new Promise((resolve) => {
+      if (img.complete) {
+        resolve();
+      } else {
+        img.onload = resolve;
+        img.onerror = resolve; // даже если ошибка, продолжаем (чтобы не зависнуть)
+      }
+    });
+    promises.push(promise);
   }
+  return Promise.all(promises);
 }
 
-// Загружаем изображения при старте
-loadImages();
+// Стартуем загрузку и после полной отрисовки проверяем параметр
+loadImages().then(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const startapp = urlParams.get('startapp'); // например, "3"
 
-// --- Добавленный код для прокрутки к конкретному изображению ---
-// Получаем параметр startapp из URL
-const urlParams = new URLSearchParams(window.location.search);
-const startapp = urlParams.get('startapp'); // например, "3"
-
-if (startapp) {
-  // Пытаемся преобразовать в число
-  const imageNumber = parseInt(startapp, 10);
-  // Проверяем, что это число и в допустимом диапазоне
-  if (!isNaN(imageNumber) && imageNumber >= 1 && imageNumber <= maxImageNumber) {
-    // Индекс в DOM (нумерация с 0)
-    const index = imageNumber - 1;
-    // Получаем все изображения внутри контейнера
-    const images = imageContainer.querySelectorAll('img');
-    if (images.length > index) {
-      const targetImage = images[index];
-      // Плавная прокрутка к элементу
-      targetImage.scrollIntoView({ behavior: 'smooth' });
+  if (startapp) {
+    const imageNumber = parseInt(startapp, 10);
+    if (!isNaN(imageNumber) && imageNumber >= 1 && imageNumber <= maxImageNumber) {
+      const images = imageContainer.querySelectorAll('img');
+      const targetImage = images[imageNumber - 1];
+      if (targetImage) {
+        // Мгновенная прокрутка (без анимации)
+        targetImage.scrollIntoView({ block: 'start' });
+      }
     }
   }
-}
+});
