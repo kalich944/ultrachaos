@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #fff; /* Фон белый */
+}
+
+#imageContainer {
+  padding: 0; /* Убраны отступы */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#imageContainer img {
+  width: 100%; /* Ширина на весь экран */
+  height: auto;
+  margin-bottom: 0px; /* Зазор около 5 мм (20px) */
+  border: none; /* Обводка убрана */
+}
