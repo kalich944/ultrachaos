@@ -29,7 +29,12 @@ function showMenu() {
         img.style.cursor = 'pointer';
       }
       
-      imageContainer.appendChild(img);
+      // Оборачиваем каждое изображение в div с классом image-wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'image-wrapper';
+      wrapper.appendChild(img);
+      imageContainer.appendChild(wrapper);
+      
       i++;
       loadNext();
     };
@@ -56,7 +61,13 @@ function showRules() {
     
     img.onload = function() {
       img.alt = `Правило ${currentIndex}`;
-      imageContainer.appendChild(img);
+      
+      // Оборачиваем каждое изображение в div с классом image-wrapper
+      const wrapper = document.createElement('div');
+      wrapper.className = 'image-wrapper';
+      wrapper.appendChild(img);
+      imageContainer.appendChild(wrapper);
+      
       i++;
       loadNext();
     };
