@@ -1,19 +1,16 @@
 const imageContainer = document.getElementById('imageContainer');
 const closeButton = document.getElementById('closeButton');
 
-// Текущий экран: 'menu' или 'rules'
 let currentScreen = 'menu';
 
-// Обработчик для крестика
 closeButton.addEventListener('click', function() {
   showMenu();
 });
 
-// Показываем меню
 function showMenu() {
   currentScreen = 'menu';
-  closeButton.style.display = 'none'; // Прячем крестик в меню
-  imageContainer.innerHTML = ''; // Очищаем
+  closeButton.style.display = 'none';
+  imageContainer.innerHTML = '';
   
   let i = 1;
   
@@ -25,7 +22,6 @@ function showMenu() {
     img.onload = function() {
       img.alt = `Меню ${currentIndex}`;
       
-      // Третья картинка ведёт в правила
       if (currentIndex === 3) {
         img.addEventListener('click', function() {
           showRules();
@@ -46,12 +42,10 @@ function showMenu() {
   loadNext();
 }
 
-// Показываем правила
 function showRules() {
-  console.log('Переход к правилам');
   currentScreen = 'rules';
-  closeButton.style.display = 'block'; // Показываем крестик
-  imageContainer.innerHTML = ''; // Очищаем
+  closeButton.style.display = 'block';
+  imageContainer.innerHTML = '';
   
   let i = 1;
   
@@ -75,5 +69,4 @@ function showRules() {
   loadNext();
 }
 
-// Запускаем меню
 showMenu();
