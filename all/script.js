@@ -2,7 +2,10 @@
 const menuScreen = document.getElementById('menu-screen');
 const rulesScreen = document.getElementById('rules-screen');
 const botScreen = document.getElementById('bot-screen');
+const galleryScreen = document.getElementById('gallery-screen');
 const closeButton = document.getElementById('closeButton');
+const fullscreen = document.getElementById('fullscreen');
+const fullscreenImg = document.getElementById('fullscreen-img');
 
 // Контейнеры
 const imageContainer = document.getElementById('imageContainer');
@@ -14,13 +17,19 @@ const botOpening = document.getElementById('bot-opening');
 const botCrystal = document.getElementById('bot-crystal');
 const botOption = document.getElementById('bot-option');
 
+// Элементы галереи
+const mainGallery = document.getElementById('main-gallery');
+const pGallery = document.getElementById('p-gallery');
+const aGallery = document.getElementById('a-gallery');
+const wGallery = document.getElementById('w-gallery');
+
 // Динамические массивы
 let botCrystals = [];
 let botOptions = [];
 
 // Текущий экран
 let currentScreen = 'menu';
-let botFirstClick = true; // true = обложка ещё не убрана
+let botFirstClick = true;
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null) {
@@ -57,6 +66,82 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
   loadNext();
 }
 
+// ========== ФУНКЦИИ ГАЛЕРЕИ ==========
+function checkImageExists(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+function createCard(url, detailUrl, parentGallery) {
+  const cardContainer = document.createElement('div');
+  cardContainer.className = 'card-container';
+
+  const img = document.createElement('img');
+  img.src = `gallery/${url}`;
+  img.alt = `Карта`;
+  img.className = 'card-image';
+  img.loading = 'lazy';
+
+  checkImageExists(`gallery/${detailUrl}`).then((exists) => {
+    if (exists) {
+      const cornerImg = document.createElement('img');
+      cornerImg.src = 'gallery/corner.jpg';
+      cornerImg.alt = 'Уголок';
+      cornerImg.className = 'corner-image';
+      cardContainer.appendChild(cornerImg);
+
+      img.addEventListener('click', () => {
+        fullscreenImg.src = `gallery/${detailUrl}`;
+        fullscreen.classList.remove('hidden');
+      });
+    } else {
+      img.addEventListener('click', () => {
+        fullscreenImg.src = `gallery/${url}`;
+        fullscreen.classList.remove('hidden');
+      });
+    }
+  });
+
+  img.onerror = () => cardContainer.remove();
+  cardContainer.appendChild(img);
+  parentGallery.appendChild(cardContainer);
+}
+
+async function loadMainGallery() {
+  mainGallery.innerHTML = '';
+  for (let i = 1; i <= 200; i++) {
+    const baseUrl = `${i}.jpg`;
+    if (await checkImageExists(`gallery/${baseUrl}`)) {
+      createCard(baseUrl, `d${i}.jpg`, mainGallery);
+    }
+    for (let letter of ['a', 'b', 'c']) {
+      const variantUrl = `${i}${letter}.jpg`;
+      if (await checkImageExists(`gallery/${variantUrl}`)) {
+        createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery);
+      } else {
+        break;
+      }
+    }
+  }
+}
+
+async function loadSeriesGallery(prefix, galleryElement) {
+  galleryElement.innerHTML = '';
+  for (let i = 1; i <= 100; i++) {
+    const url = `${prefix}${i}.jpg`;
+    const detailUrl = `d${prefix}${i}.jpg`;
+    if (await checkImageExists(`gallery/${url}`)) {
+      createCard(url, detailUrl, galleryElement);
+    } else {
+      break;
+    }
+  }
+}
+
 // ========== ЗАГРУЗКА КРИСТАЛЛОВ ==========
 function loadBotCrystals() {
   botCrystals = [];
@@ -75,7 +160,7 @@ function loadBotCrystals() {
     
     img.onerror = function() {
       console.log(`Загружено кристаллов: ${botCrystals.length}`);
-      loadBotOptions(); // После кристаллов грузим опции
+      loadBotOptions();
     };
   }
   
@@ -100,7 +185,6 @@ function loadBotOptions() {
     
     img.onerror = function() {
       console.log(`Загружено опций: ${botOptions.length}`);
-      // Показываем бота после загрузки всего
       showBotReady();
     };
   }
@@ -110,7 +194,6 @@ function loadBotOptions() {
 
 // ========== ФУНКЦИИ БОТА ==========
 function showBotReady() {
-  // Устанавливаем начальные изображения
   if (botCrystals.length > 0) {
     botCrystal.src = botCrystals[0];
   }
@@ -118,7 +201,6 @@ function showBotReady() {
     botOption.src = botOptions[0];
   }
   
-  // Скрываем кристалл и опцию, показываем только обложку
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
@@ -126,7 +208,6 @@ function showBotReady() {
 }
 
 function handleBotClick() {
-  // Первый клик — убираем обложку, показываем кристалл и опцию
   if (botFirstClick) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
@@ -134,7 +215,6 @@ function handleBotClick() {
     botFirstClick = false;
   }
   
-  // Все последующие клики — только меняем кристалл и опцию (обложка не участвует!)
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
@@ -149,14 +229,13 @@ function showMenu() {
   menuScreen.style.display = 'block';
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'none';
+  galleryScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
   loadImages(imageContainer, 'menu', 1, function(index) {
     if (index === 3) return showRules;
-    if (index === 4) return function() {
-      // При переходе в бота начинаем загрузку данных
-      showBot();
-    };
+    if (index === 4) return showBot;
+    if (index === 5) return showGallery;
     return null;
   });
 }
@@ -166,6 +245,7 @@ function showRules() {
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'block';
   botScreen.style.display = 'none';
+  galleryScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
   loadImages(rulesContainer, 'rules');
@@ -176,20 +256,40 @@ function showBot() {
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'block';
+  galleryScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  // Очищаем и показываем заглушку
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
-  // Загружаем актуальные списки файлов
   loadBotCrystals();
+}
+
+function showGallery() {
+  currentScreen = 'gallery';
+  menuScreen.style.display = 'none';
+  rulesScreen.style.display = 'none';
+  botScreen.style.display = 'none';
+  galleryScreen.style.display = 'block';
+  closeButton.style.display = 'block';
+  
+  // Загружаем все галереи
+  loadMainGallery();
+  loadSeriesGallery('p', pGallery);
+  loadSeriesGallery('a', aGallery);
+  loadSeriesGallery('w', wGallery);
 }
 
 // ========== СОБЫТИЯ ==========
 closeButton.addEventListener('click', showMenu);
 botContainer.addEventListener('click', handleBotClick);
+
+// Закрытие полноэкранного режима
+fullscreen.addEventListener('click', () => {
+  fullscreen.classList.add('hidden');
+  fullscreenImg.src = '';
+});
 
 // ========== СТАРТ ==========
 showMenu();
