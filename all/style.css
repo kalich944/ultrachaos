@@ -3,11 +3,47 @@ body {
   padding: 0;
   min-height: 100vh;
   background-color: #fff;
+  position: relative;
 }
 
+/* Рамки */
+.frame {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  z-index: 1001; /* Выше контента */
+  pointer-events: none; /* Чтобы сквозь рамку можно было кликать по контенту */
+}
+
+#frameTop {
+  top: 0;
+  height: auto;
+}
+
+#frameDown {
+  bottom: 0;
+  height: auto;
+}
+
+/* Крестик (поверх рамок) */
+#closeButton {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 1002; /* Выше рамок */
+  display: none;
+  pointer-events: auto; /* Крестик должен быть кликабельным */
+}
+
+/* Экраны */
 .screen {
   width: 100%;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 #imageContainer, #rulesContainer {
@@ -25,7 +61,7 @@ body {
   border: none;
 }
 
-/* Стили для бота (оригинальные) */
+/* Стили для бота */
 #botContainer {
   position: relative;
   width: 100%;
@@ -38,6 +74,7 @@ body {
   background-position: center;
   background-color: #000;
   margin: 0 auto;
+  z-index: 1;
 }
 
 #bot-opening {
@@ -59,6 +96,7 @@ body {
   transform: translateX(-50%);
   object-fit: contain;
   display: none;
+  z-index: 3;
 }
 
 #bot-option {
@@ -70,15 +108,5 @@ body {
   transform: translateX(-50%);
   object-fit: contain;
   display: none;
-}
-
-#closeButton {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  z-index: 1000;
-  display: none;
+  z-index: 3;
 }
