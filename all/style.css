@@ -10,7 +10,7 @@ body {
   min-height: 100vh;
 }
 
-.image-container {
+#imageContainer, #rulesContainer {
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -18,11 +18,58 @@ body {
   width: 100%;
 }
 
-.image-container img {
+#imageContainer img, #rulesContainer img {
   width: 100%;
   height: auto;
   display: block;
   border: none;
+}
+
+/* Стили для бота (оригинальные) */
+#botContainer {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  aspect-ratio: 1000 / 1529;
+  background-image: url('bot back.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #000;
+  margin: 0 auto;
+}
+
+#bot-opening {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: contain;
+  z-index: 2;
+}
+
+#bot-crystal {
+  position: absolute;
+  width: 89.3%;
+  height: auto;
+  top: 6.15%;
+  left: 50%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  display: none;
+}
+
+#bot-option {
+  position: absolute;
+  width: 93%;
+  height: auto;
+  top: 66.42%;
+  left: 50%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  display: none;
 }
 
 #closeButton {
