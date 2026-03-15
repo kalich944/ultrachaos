@@ -85,6 +85,7 @@ function createCard(url, detailUrl, parentGallery) {
   img.alt = `Карта`;
   img.className = 'card-image';
   img.loading = 'lazy';
+  img.style.cursor = 'default'; // Обычный курсор по умолчанию
 
   checkImageExists(`gallery/${detailUrl}`).then((exists) => {
     if (exists) {
@@ -94,16 +95,14 @@ function createCard(url, detailUrl, parentGallery) {
       cornerImg.className = 'corner-image';
       cardContainer.appendChild(cornerImg);
 
+      // Только если есть детали — делаем кликабельным
+      img.style.cursor = 'pointer';
       img.addEventListener('click', () => {
         fullscreenImg.src = `gallery/${detailUrl}`;
         fullscreen.classList.remove('hidden');
       });
-    } else {
-      img.addEventListener('click', () => {
-        fullscreenImg.src = `gallery/${url}`;
-        fullscreen.classList.remove('hidden');
-      });
     }
+    // Если деталей нет — никакого обработчика не добавляем
   });
 
   img.onerror = () => cardContainer.remove();
