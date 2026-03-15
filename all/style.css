@@ -2,7 +2,8 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: #fff; /* Фон белый */
+  background-color: #fff;
+  position: relative; /* Для позиционирования крестика относительно body */
 }
 
 #imageContainer {
@@ -14,9 +15,28 @@ body {
 }
 
 #imageContainer img {
-  width: 100%; /* Ширина на весь экран */
+  width: 100%;
   height: auto;
-  display: block; /* Убирает лишние отступы вокруг картинок */
+  display: block;
   border: none;
-  /* Между изображениями не будет зазоров, они будут идти плотно друг за другом */
+}
+
+#closeButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 1000; /* Чтобы быть поверх всех изображений */
+  display: none; /* По умолчанию скрыт */
+  border-radius: 50%; /* Делаем круглым, если close.png квадратный */
+  background-color: rgba(255, 255, 255, 0.7); /* Полупрозрачный фон для читаемости */
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s; /* Небольшая анимация */
+}
+
+#closeButton:hover {
+  transform: scale(1.1); /* Увеличивается при наведении */
 }
