@@ -5,18 +5,27 @@ function loadImages() {
   
   function tryLoadNext() {
     const img = new Image();
-    const imgPath = `rules (${i}).png`; // Ищем rules (1).png, rules (2).png...
+    const imgPath = `menu (${i}).png`; // Ищем menu (1).png, menu (2).png и т.д.
     
     img.onload = function() {
-      img.alt = `Правило ${i}`;
+      img.alt = `Меню ${i}`;
+      
+      // Добавляем обработчик клика только для ТРЕТЬЕГО изображения (i === 3)
+      if (i === 3) {
+        img.addEventListener('click', () => {
+          window.open('https://kalich944.github.io/ultrachaos/all/rules/', '_blank');
+        });
+        img.style.cursor = 'pointer'; // Меняем курсор, чтобы было видно, что это ссылка
+      }
+      
       imageContainer.appendChild(img);
       i++;
-      tryLoadNext(); // Загружаем следующий номер
+      tryLoadNext(); // Пробуем загрузить следующее
     };
     
     img.onerror = function() {
-      console.log(`Загружено ${i-1} правил`);
-      // Можно добавить скрытый текст или заглушку, если нужно
+      // Как только картинка не нашлась, прекращаем
+      console.log(`Загружено ${i-1} изображений меню`);
     };
     
     img.src = imgPath;
