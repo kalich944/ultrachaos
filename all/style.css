@@ -1,9 +1,10 @@
-body {
+/* Базовые стили */
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
   min-height: 100vh;
-  background-color: #fff;
-  position: relative;
+  background-color: #000000;
 }
 
 /* Рамки */
@@ -11,8 +12,8 @@ body {
   position: fixed;
   left: 0;
   width: 100%;
-  z-index: 1001; /* Выше контента */
-  pointer-events: none; /* Чтобы сквозь рамку можно было кликать по контенту */
+  z-index: 1001;
+  pointer-events: none;
 }
 
 #frameTop {
@@ -25,7 +26,7 @@ body {
   height: auto;
 }
 
-/* Крестик (поверх рамок) */
+/* Крестик */
 #closeButton {
   position: fixed;
   top: 0;
@@ -33,9 +34,9 @@ body {
   width: 40px;
   height: 40px;
   cursor: pointer;
-  z-index: 1002; /* Выше рамок */
+  z-index: 1002;
   display: none;
-  pointer-events: auto; /* Крестик должен быть кликабельным */
+  pointer-events: auto;
 }
 
 /* Экраны */
@@ -44,24 +45,61 @@ body {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  background-color: #000000;
 }
 
-#imageContainer, #rulesContainer {
+/* ===== МЕНЮ (зум отключён) ===== */
+#menu-screen {
+  touch-action: pan-y pinch-zoom; /* Только вертикальный скролл */
+}
+
+#imageContainer {
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  background-color: #000000;
 }
 
-#imageContainer img, #rulesContainer img {
+#imageContainer img {
   width: 100%;
   height: auto;
   display: block;
   border: none;
 }
 
-/* Стили для бота */
+/* ===== ПРАВИЛА (зум ВКЛЮЧЁН) ===== */
+#rules-screen {
+  touch-action: auto; /* Полное разрешение на зум */
+}
+
+#rulesContainer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  background-color: #000000;
+}
+
+#rulesContainer img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: none;
+}
+
+/* ===== БОТ (зум отключён) ===== */
+.bot-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #000000;
+}
+
 #botContainer {
   position: relative;
   width: 100%;
@@ -72,9 +110,10 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: #000;
+  background-color: #000000;
   margin: 0 auto;
   z-index: 1;
+  touch-action: none; /* Полный запрет зума */
 }
 
 #bot-opening {
@@ -85,6 +124,7 @@ body {
   left: 0;
   object-fit: contain;
   z-index: 2;
+  pointer-events: none;
 }
 
 #bot-crystal {
@@ -97,6 +137,7 @@ body {
   object-fit: contain;
   display: none;
   z-index: 3;
+  pointer-events: none;
 }
 
 #bot-option {
@@ -109,4 +150,12 @@ body {
   object-fit: contain;
   display: none;
   z-index: 3;
+  pointer-events: none;
+}
+
+/* Для очень высоких экранов */
+@media screen and (min-aspect-ratio: 1000/1529) {
+  .bot-wrapper {
+    padding: 20px 0;
+  }
 }
