@@ -1,37 +1,66 @@
 const imageContainer = document.getElementById('imageContainer');
 
-function loadImages() {
+// Текущий экран: 'menu' или 'rules'
+let currentScreen = 'menu';
+
+// Показываем меню
+function showMenu() {
+  currentScreen = 'menu';
+  imageContainer.innerHTML = ''; // Очищаем
+  
   let i = 1;
   
-  function tryLoadNext() {
+  function loadNext() {
     const img = new Image();
-    const imgPath = `menu (${i}).png`; // Ищем menu (1).png, menu (2).png и т.д.
+    img.src = `menu (${i}).png`;
     
     img.onload = function() {
       img.alt = `Меню ${i}`;
       
-      // Добавляем обработчик клика только для ТРЕТЬЕГО изображения (i === 3)
+      // Третья картинка ведёт в правила
       if (i === 3) {
-        img.addEventListener('click', () => {
-          window.open('https://kalich944.github.io/ultrachaos/all/rules/', '_blank');
-        });
-        img.style.cursor = 'pointer'; // Меняем курсор, чтобы было видно, что это ссылка
+        img.addEventListener('click', showRules);
+        img.style.cursor = 'pointer';
       }
       
       imageContainer.appendChild(img);
       i++;
-      tryLoadNext(); // Пробуем загрузить следующее
+      loadNext(); // Загружаем следующую
     };
     
     img.onerror = function() {
-      // Как только картинка не нашлась, прекращаем
-      console.log(`Загружено ${i-1} изображений меню`);
+      console.log(`Загружено ${i-1} пунктов меню`);
     };
-    
-    img.src = imgPath;
   }
   
-  tryLoadNext();
+  loadNext();
 }
 
-loadImages();
+// Показываем правила
+function showRules() {
+  currentScreen = 'rules';
+  imageContainer.innerHTML = ''; // Очищаем
+  
+  let i = 1;
+  
+  function loadNext() {
+    const img = new Image();
+    img.src = `rules (${i}).png`;
+    
+    img.onload = function() {
+      img.alt = `Правило ${i}`;
+      imageContainer.appendChild(img);
+      i++;
+      loadNext();
+    };
+    
+    img.onerror = function() {
+      console.log(`Загружено ${i-1} правил`);
+    };
+  }
+  
+  loadNext();
+}
+
+// Запускаем меню
+showMenu();
