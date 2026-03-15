@@ -12,14 +12,17 @@ function showMenu() {
   
   function loadNext() {
     const img = new Image();
-    img.src = `menu (${i}).png`;
+    const currentIndex = i; // Сохраняем текущее значение i для этого изображения
+    img.src = `menu (${currentIndex}).png`;
     
     img.onload = function() {
-      img.alt = `Меню ${i}`;
+      img.alt = `Меню ${currentIndex}`;
       
       // Третья картинка ведёт в правила
-      if (i === 3) {
-        img.addEventListener('click', showRules);
+      if (currentIndex === 3) {
+        img.addEventListener('click', function() {
+          showRules(); // Вызываем showRules, а не открываем ссылку
+        });
         img.style.cursor = 'pointer';
       }
       
@@ -38,6 +41,7 @@ function showMenu() {
 
 // Показываем правила
 function showRules() {
+  console.log('Переход к правилам'); // Для отладки
   currentScreen = 'rules';
   imageContainer.innerHTML = ''; // Очищаем
   
@@ -45,10 +49,11 @@ function showRules() {
   
   function loadNext() {
     const img = new Image();
-    img.src = `rules (${i}).png`;
+    const currentIndex = i;
+    img.src = `rules (${currentIndex}).png`;
     
     img.onload = function() {
-      img.alt = `Правило ${i}`;
+      img.alt = `Правило ${currentIndex}`;
       imageContainer.appendChild(img);
       i++;
       loadNext();
