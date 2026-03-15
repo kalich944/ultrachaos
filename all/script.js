@@ -7,7 +7,7 @@ async function loadImages() {
   
   while (hasMoreImages) {
     // Пробуем загрузить изображение menu (i).png
-    const imgPath = `all/menu (${i}).png`;
+    const imgPath = `menu (${i}).png`;
     
     try {
       // Создаём объект Image для проверки существования файла
