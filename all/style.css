@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #fff; /* Фон белый */
+}
+
+#imageContainer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+#imageContainer img {
+  width: 100%; /* Ширина на весь экран */
+  height: auto;
+  display: block; /* Убирает лишние отступы вокруг картинок */
+  border: none;
+  /* Между изображениями не будет зазоров, они будут идти плотно друг за другом */
+}
