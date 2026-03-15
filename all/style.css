@@ -4,9 +4,9 @@ html, body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: #000000; /* Чёрный фон везде */
-  touch-action: pan-y pinch-zoom; /* Разрешаем только вертикальный скролл и зум пальцами */
-  -webkit-text-size-adjust: 100%; /* Запрет изменения размера текста */
+  background-color: #000000;
+  touch-action: pan-y pinch-zoom;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Дополнительный запрет зума для iOS */
@@ -52,7 +52,7 @@ body {
   min-height: 100vh;
   position: relative;
   z-index: 1;
-  background-color: #000000; /* Чёрный фон */
+  background-color: #000000;
 }
 
 /* Главное меню и правила */
@@ -62,7 +62,7 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  background-color: #000000; /* Чёрный фон */
+  background-color: #000000;
 }
 
 #imageContainer img, #rulesContainer img {
@@ -79,7 +79,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  background-color: #000000; /* Чёрный фон */
+  background-color: #000000;
 }
 
 /* Стили для бота */
@@ -96,7 +96,7 @@ body {
   background-color: #000000;
   margin: 0 auto;
   z-index: 1;
-  touch-action: none; /* Полный запрет зума внутри бота */
+  touch-action: none;
 }
 
 #bot-opening {
@@ -107,7 +107,7 @@ body {
   left: 0;
   object-fit: contain;
   z-index: 2;
-  pointer-events: none; /* Чтобы клики проходили сквозь обложку к контейнеру */
+  pointer-events: none;
 }
 
 #bot-crystal {
@@ -120,7 +120,7 @@ body {
   object-fit: contain;
   display: none;
   z-index: 3;
-  pointer-events: none; /* Чтобы клики проходили сквозь кристалл к контейнеру */
+  pointer-events: none;
 }
 
 #bot-option {
@@ -133,7 +133,7 @@ body {
   object-fit: contain;
   display: none;
   z-index: 3;
-  pointer-events: none; /* Чтобы клики проходили сквозь опцию к контейнеру */
+  pointer-events: none;
 }
 
 /* Для очень высоких экранов */
