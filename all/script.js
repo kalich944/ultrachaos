@@ -26,20 +26,27 @@ const wGallery = document.getElementById('w-gallery');
 // Динамические массивы
 let botCrystals = [];
 let botOptions = [];
-let allRulesImages = []; // Для хранения всех изображений правил
-let allGalleryCards = []; // Для хранения всех карт галереи
+let allRulesImages = [];
+let allGalleryCards = [];
+
+// Флаги загрузки
+let menuLoaded = false;
+let rulesLoaded = false;
+let galleryLoaded = false;
 
 // Текущий экран
 let currentScreen = 'menu';
 let botFirstClick = true;
-let pendingHash = null; // Для отложенной навигации
+let pendingHash = null;
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null, collectInArray = null) {
+  // Очищаем контейнер и массив
   container.innerHTML = '';
-  if (collectInArray) collectInArray.length = 0; // Очищаем массив
+  if (collectInArray) collectInArray.length = 0;
   
   let i = startNumber;
+  let loadedCount = 0;
   
   function loadNext() {
     const img = new Image();
@@ -48,9 +55,10 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
     
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
-      img.id = `${baseName}-${currentIndex}`; // Добавляем ID для навигации
+      img.id = `${baseName}-${currentIndex}`;
+      img.setAttribute('data-index', currentIndex);
       
-      if (collectInArray) collectInArray.push(img); // Сохраняем в массив
+      if (collectInArray) collectInArray.push(img);
       
       if (onClick) {
         const handler = onClick(currentIndex);
@@ -61,14 +69,19 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
       }
       
       container.appendChild(img);
+      loadedCount++;
       i++;
       loadNext();
     };
     
     img.onerror = function() {
-      console.log(`Загружено ${i-startNumber} изображений ${baseName}`);
+      console.log(`Загружено ${loadedCount} изображений ${baseName}`);
       
-      // После загрузки проверяем, есть ли ожидаемая навигация
+      // Устанавливаем флаг загрузки
+      if (baseName === 'menu') menuLoaded = true;
+      if (baseName === 'rules') rulesLoaded = true;
+      
+      // После загрузки проверяем навигацию
       if (pendingHash) {
         handleDeepLink(pendingHash);
         pendingHash = null;
@@ -90,9 +103,12 @@ function checkImageExists(url) {
 }
 
 function createCard(url, detailUrl, parentGallery, cardId) {
+  // Проверяем, не существует ли уже такой карточки
+  if (document.getElementById(cardId)) return;
+  
   const cardContainer = document.createElement('div');
   cardContainer.className = 'card-container';
-  cardContainer.id = cardId; // Уникальный ID для навигации
+  cardContainer.id = cardId;
 
   const img = document.createElement('img');
   img.src = `gallery/${url}`;
@@ -121,13 +137,11 @@ function createCard(url, detailUrl, parentGallery, cardId) {
   cardContainer.appendChild(img);
   parentGallery.appendChild(cardContainer);
   
-  // Сохраняем в общий массив для навигации
   allGalleryCards.push(cardContainer);
-  
-  return cardContainer;
 }
 
 async function loadMainGallery() {
+  // Очищаем всё
   mainGallery.innerHTML = '';
   allGalleryCards = [];
   
@@ -136,15 +150,17 @@ async function loadMainGallery() {
     if (await checkImageExists(`gallery/${baseUrl}`)) {
       createCard(baseUrl, `d${i}.jpg`, mainGallery, `gallery-card-${i}`);
     }
+    
+    // Загружаем варианты a, b, c
     for (let letter of ['a', 'b', 'c']) {
       const variantUrl = `${i}${letter}.jpg`;
       if (await checkImageExists(`gallery/${variantUrl}`)) {
         createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery, `gallery-card-${i}${letter}`);
-      } else {
-        break;
       }
     }
   }
+  
+  galleryLoaded = true;
   
   // После загрузки проверяем навигацию
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
@@ -154,7 +170,9 @@ async function loadMainGallery() {
 }
 
 async function loadSeriesGallery(prefix, galleryElement, seriesName) {
+  // Очищаем
   galleryElement.innerHTML = '';
+  
   for (let i = 1; i <= 100; i++) {
     const url = `${prefix}${i}.jpg`;
     const detailUrl = `d${prefix}${i}.jpg`;
@@ -172,40 +190,40 @@ function handleDeepLink(hash) {
   
   console.log('Обработка ссылки:', hash);
   
-  // Правила: #rules-5
-  if (hash.startsWith('#rules-')) {
-    const ruleNumber = hash.replace('#rules-', '');
+  // Убираем #
+  const target = hash.substring(1);
+  
+  // Правила: rules-5
+  if (target.startsWith('rules-')) {
     showRules();
     
-    // Ждём загрузки правил и скроллим
     setTimeout(() => {
-      const targetImg = document.getElementById(`rules-${ruleNumber}`);
+      const targetImg = document.getElementById(target);
       if (targetImg) {
         targetImg.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 500);
   }
   
-  // Галерея: #gallery-card-123 или #gallery-p-42
-  else if (hash.startsWith('#gallery-')) {
+  // Галерея: gallery-card-123 или gallery-p-42
+  else if (target.startsWith('gallery-')) {
     showGallery();
     
-    // Ждём загрузки галереи и скроллим
     setTimeout(() => {
-      const targetCard = document.getElementById(hash.substring(1)); // убираем #
+      const targetCard = document.getElementById(target);
       if (targetCard) {
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    }, 1000); // Галерея грузится дольше
+    }, 1000);
   }
   
-  // Бот: #bot
-  else if (hash === '#bot') {
+  // Бот: bot
+  else if (target === 'bot') {
     showBot();
   }
   
-  // Меню: #menu или ничего
-  else if (hash === '#menu' || hash === '#') {
+  // Меню: menu
+  else if (target === 'menu') {
     showMenu();
   }
 }
@@ -254,11 +272,6 @@ function loadBotOptions() {
     img.onerror = function() {
       console.log(`Загружено опций: ${botOptions.length}`);
       showBotReady();
-      
-      // После загрузки бота проверяем навигацию
-      if (pendingHash === '#bot') {
-        pendingHash = null;
-      }
     };
   }
   
@@ -298,6 +311,8 @@ function handleBotClick() {
 
 // ========== ПОКАЗ ЭКРАНОВ ==========
 function showMenu() {
+  if (currentScreen === 'menu') return; // Уже на этом экране
+  
   currentScreen = 'menu';
   menuScreen.style.display = 'block';
   rulesScreen.style.display = 'none';
@@ -305,18 +320,22 @@ function showMenu() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  loadImages(imageContainer, 'menu', 1, function(index) {
-    if (index === 3) return showRules;
-    if (index === 4) return showBot;
-    if (index === 5) return showGallery;
-    return null;
-  });
+  // Загружаем только если ещё не загружено
+  if (!menuLoaded) {
+    loadImages(imageContainer, 'menu', 1, function(index) {
+      if (index === 3) return showRules;
+      if (index === 4) return showBot;
+      if (index === 5) return showGallery;
+      return null;
+    });
+  }
   
-  // Меняем hash без перезагрузки
   window.location.hash = 'menu';
 }
 
 function showRules() {
+  if (currentScreen === 'rules') return;
+  
   currentScreen = 'rules';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'block';
@@ -324,11 +343,16 @@ function showRules() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  loadImages(rulesContainer, 'rules', 1, null, allRulesImages);
+  if (!rulesLoaded) {
+    loadImages(rulesContainer, 'rules', 1, null, allRulesImages);
+  }
+  
   window.location.hash = 'rules';
 }
 
 function showBot() {
+  if (currentScreen === 'bot') return;
+  
   currentScreen = 'bot';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
@@ -340,11 +364,15 @@ function showBot() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
+  // Бот всегда перезагружает данные при входе
   loadBotCrystals();
+  
   window.location.hash = 'bot';
 }
 
 function showGallery() {
+  if (currentScreen === 'gallery') return;
+  
   currentScreen = 'gallery';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
@@ -352,11 +380,13 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  // Загружаем все галереи
-  loadMainGallery();
-  loadSeriesGallery('p', pGallery, 'p');
-  loadSeriesGallery('a', aGallery, 'a');
-  loadSeriesGallery('w', wGallery, 'w');
+  // Загружаем только если ещё не загружено
+  if (!galleryLoaded) {
+    loadMainGallery();
+    loadSeriesGallery('p', pGallery, 'p');
+    loadSeriesGallery('a', aGallery, 'a');
+    loadSeriesGallery('w', wGallery, 'w');
+  }
   
   window.location.hash = 'gallery';
 }
@@ -365,7 +395,6 @@ function showGallery() {
 closeButton.addEventListener('click', showMenu);
 botContainer.addEventListener('click', handleBotClick);
 
-// Закрытие полноэкранного режима
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
@@ -375,12 +404,10 @@ fullscreen.addEventListener('click', () => {
 window.addEventListener('load', () => {
   const hash = window.location.hash;
   if (hash) {
-    // Если есть hash, запоминаем и обработаем после загрузки меню
     pendingHash = hash;
   }
 });
 
-// Слушаем изменения hash (если пользователь меняет вручную)
 window.addEventListener('hashchange', () => {
   handleDeepLink(window.location.hash);
 });
