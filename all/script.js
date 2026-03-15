@@ -14,13 +14,13 @@ const botOpening = document.getElementById('bot-opening');
 const botCrystal = document.getElementById('bot-crystal');
 const botOption = document.getElementById('bot-option');
 
-// Динамические массивы (будут заполняться при загрузке)
+// Динамические массивы
 let botCrystals = [];
 let botOptions = [];
 
 // Текущий экран
 let currentScreen = 'menu';
-let botFirstClick = true;
+let botFirstClick = true; // true = обложка ещё не убрана
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null) {
@@ -57,7 +57,7 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
   loadNext();
 }
 
-// ========== ЗАГРУЗКА КРИСТАЛЛОВ ДЛЯ БОТА ==========
+// ========== ЗАГРУЗКА КРИСТАЛЛОВ ==========
 function loadBotCrystals() {
   botCrystals = [];
   let i = 1;
@@ -74,16 +74,15 @@ function loadBotCrystals() {
     };
     
     img.onerror = function() {
-      console.log(`Загружено ${botCrystals.length} кристаллов`);
-      // После загрузки кристаллов загружаем опции
-      loadBotOptions();
+      console.log(`Загружено кристаллов: ${botCrystals.length}`);
+      loadBotOptions(); // После кристаллов грузим опции
     };
   }
   
   loadNext();
 }
 
-// ========== ЗАГРУЗКА ОПЦИЙ ДЛЯ БОТА ==========
+// ========== ЗАГРУЗКА ОПЦИЙ ==========
 function loadBotOptions() {
   botOptions = [];
   let i = 1;
@@ -100,9 +99,9 @@ function loadBotOptions() {
     };
     
     img.onerror = function() {
-      console.log(`Загружено ${botOptions.length} опций боя`);
-      // После загрузки всех данных показываем бота
-      showBotScreen();
+      console.log(`Загружено опций: ${botOptions.length}`);
+      // Показываем бота после загрузки всего
+      showBotReady();
     };
   }
   
@@ -110,22 +109,24 @@ function loadBotOptions() {
 }
 
 // ========== ФУНКЦИИ БОТА ==========
-function initBot() {
-  botFirstClick = true;
-  botOpening.style.display = 'block';
-  botCrystal.style.display = 'none';
-  botOption.style.display = 'none';
-  
-  // Устанавливаем первый элемент как заглушку, если массивы не пустые
+function showBotReady() {
+  // Устанавливаем начальные изображения
   if (botCrystals.length > 0) {
     botCrystal.src = botCrystals[0];
   }
   if (botOptions.length > 0) {
     botOption.src = botOptions[0];
   }
+  
+  // Скрываем кристалл и опцию, показываем только обложку
+  botOpening.style.display = 'block';
+  botCrystal.style.display = 'none';
+  botOption.style.display = 'none';
+  botFirstClick = true;
 }
 
 function handleBotClick() {
+  // Первый клик — убираем обложку, показываем кристалл и опцию
   if (botFirstClick) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
@@ -133,6 +134,7 @@ function handleBotClick() {
     botFirstClick = false;
   }
   
+  // Все последующие клики — только меняем кристалл и опцию (обложка не участвует!)
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
@@ -151,7 +153,10 @@ function showMenu() {
   
   loadImages(imageContainer, 'menu', 1, function(index) {
     if (index === 3) return showRules;
-    if (index === 4) return showBot;
+    if (index === 4) return function() {
+      // При переходе в бота начинаем загрузку данных
+      showBot();
+    };
     return null;
   });
 }
@@ -173,18 +178,13 @@ function showBot() {
   botScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  // Показываем заглушку или сообщение о загрузке
+  // Очищаем и показываем заглушку
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
-  // Загружаем кристаллы (они запустят цепочку загрузки опций)
+  // Загружаем актуальные списки файлов
   loadBotCrystals();
-}
-
-function showBotScreen() {
-  // Этот экран вызывается после загрузки всех данных
-  initBot();
 }
 
 // ========== СОБЫТИЯ ==========
