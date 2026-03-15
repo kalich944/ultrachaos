@@ -26,14 +26,18 @@ const wGallery = document.getElementById('w-gallery');
 // Динамические массивы
 let botCrystals = [];
 let botOptions = [];
+let allRulesImages = []; // Для хранения всех изображений правил
+let allGalleryCards = []; // Для хранения всех карт галереи
 
 // Текущий экран
 let currentScreen = 'menu';
 let botFirstClick = true;
+let pendingHash = null; // Для отложенной навигации
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
-function loadImages(container, baseName, startNumber = 1, onClick = null) {
+function loadImages(container, baseName, startNumber = 1, onClick = null, collectInArray = null) {
   container.innerHTML = '';
+  if (collectInArray) collectInArray.length = 0; // Очищаем массив
   
   let i = startNumber;
   
@@ -44,6 +48,9 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
     
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
+      img.id = `${baseName}-${currentIndex}`; // Добавляем ID для навигации
+      
+      if (collectInArray) collectInArray.push(img); // Сохраняем в массив
       
       if (onClick) {
         const handler = onClick(currentIndex);
@@ -60,6 +67,12 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
     
     img.onerror = function() {
       console.log(`Загружено ${i-startNumber} изображений ${baseName}`);
+      
+      // После загрузки проверяем, есть ли ожидаемая навигация
+      if (pendingHash) {
+        handleDeepLink(pendingHash);
+        pendingHash = null;
+      }
     };
   }
   
@@ -76,16 +89,17 @@ function checkImageExists(url) {
   });
 }
 
-function createCard(url, detailUrl, parentGallery) {
+function createCard(url, detailUrl, parentGallery, cardId) {
   const cardContainer = document.createElement('div');
   cardContainer.className = 'card-container';
+  cardContainer.id = cardId; // Уникальный ID для навигации
 
   const img = document.createElement('img');
   img.src = `gallery/${url}`;
   img.alt = `Карта`;
   img.className = 'card-image';
   img.loading = 'lazy';
-  img.style.cursor = 'default'; // Обычный курсор по умолчанию
+  img.style.cursor = 'default';
 
   checkImageExists(`gallery/${detailUrl}`).then((exists) => {
     if (exists) {
@@ -95,49 +109,104 @@ function createCard(url, detailUrl, parentGallery) {
       cornerImg.className = 'corner-image';
       cardContainer.appendChild(cornerImg);
 
-      // Только если есть детали — делаем кликабельным
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => {
         fullscreenImg.src = `gallery/${detailUrl}`;
         fullscreen.classList.remove('hidden');
       });
     }
-    // Если деталей нет — никакого обработчика не добавляем
   });
 
   img.onerror = () => cardContainer.remove();
   cardContainer.appendChild(img);
   parentGallery.appendChild(cardContainer);
+  
+  // Сохраняем в общий массив для навигации
+  allGalleryCards.push(cardContainer);
+  
+  return cardContainer;
 }
 
 async function loadMainGallery() {
   mainGallery.innerHTML = '';
+  allGalleryCards = [];
+  
   for (let i = 1; i <= 200; i++) {
     const baseUrl = `${i}.jpg`;
     if (await checkImageExists(`gallery/${baseUrl}`)) {
-      createCard(baseUrl, `d${i}.jpg`, mainGallery);
+      createCard(baseUrl, `d${i}.jpg`, mainGallery, `gallery-card-${i}`);
     }
     for (let letter of ['a', 'b', 'c']) {
       const variantUrl = `${i}${letter}.jpg`;
       if (await checkImageExists(`gallery/${variantUrl}`)) {
-        createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery);
+        createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery, `gallery-card-${i}${letter}`);
       } else {
         break;
       }
     }
   }
+  
+  // После загрузки проверяем навигацию
+  if (pendingHash && pendingHash.startsWith('#gallery-')) {
+    handleDeepLink(pendingHash);
+    pendingHash = null;
+  }
 }
 
-async function loadSeriesGallery(prefix, galleryElement) {
+async function loadSeriesGallery(prefix, galleryElement, seriesName) {
   galleryElement.innerHTML = '';
   for (let i = 1; i <= 100; i++) {
     const url = `${prefix}${i}.jpg`;
     const detailUrl = `d${prefix}${i}.jpg`;
     if (await checkImageExists(`gallery/${url}`)) {
-      createCard(url, detailUrl, galleryElement);
+      createCard(url, detailUrl, galleryElement, `gallery-${seriesName}-${i}`);
     } else {
       break;
     }
+  }
+}
+
+// ========== ГЛУБОКИЕ ССЫЛКИ ==========
+function handleDeepLink(hash) {
+  if (!hash || hash === '#') return;
+  
+  console.log('Обработка ссылки:', hash);
+  
+  // Правила: #rules-5
+  if (hash.startsWith('#rules-')) {
+    const ruleNumber = hash.replace('#rules-', '');
+    showRules();
+    
+    // Ждём загрузки правил и скроллим
+    setTimeout(() => {
+      const targetImg = document.getElementById(`rules-${ruleNumber}`);
+      if (targetImg) {
+        targetImg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 500);
+  }
+  
+  // Галерея: #gallery-card-123 или #gallery-p-42
+  else if (hash.startsWith('#gallery-')) {
+    showGallery();
+    
+    // Ждём загрузки галереи и скроллим
+    setTimeout(() => {
+      const targetCard = document.getElementById(hash.substring(1)); // убираем #
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 1000); // Галерея грузится дольше
+  }
+  
+  // Бот: #bot
+  else if (hash === '#bot') {
+    showBot();
+  }
+  
+  // Меню: #menu или ничего
+  else if (hash === '#menu' || hash === '#') {
+    showMenu();
   }
 }
 
@@ -185,6 +254,11 @@ function loadBotOptions() {
     img.onerror = function() {
       console.log(`Загружено опций: ${botOptions.length}`);
       showBotReady();
+      
+      // После загрузки бота проверяем навигацию
+      if (pendingHash === '#bot') {
+        pendingHash = null;
+      }
     };
   }
   
@@ -237,6 +311,9 @@ function showMenu() {
     if (index === 5) return showGallery;
     return null;
   });
+  
+  // Меняем hash без перезагрузки
+  window.location.hash = 'menu';
 }
 
 function showRules() {
@@ -247,7 +324,8 @@ function showRules() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  loadImages(rulesContainer, 'rules');
+  loadImages(rulesContainer, 'rules', 1, null, allRulesImages);
+  window.location.hash = 'rules';
 }
 
 function showBot() {
@@ -263,6 +341,7 @@ function showBot() {
   botOption.style.display = 'none';
   
   loadBotCrystals();
+  window.location.hash = 'bot';
 }
 
 function showGallery() {
@@ -275,9 +354,11 @@ function showGallery() {
   
   // Загружаем все галереи
   loadMainGallery();
-  loadSeriesGallery('p', pGallery);
-  loadSeriesGallery('a', aGallery);
-  loadSeriesGallery('w', wGallery);
+  loadSeriesGallery('p', pGallery, 'p');
+  loadSeriesGallery('a', aGallery, 'a');
+  loadSeriesGallery('w', wGallery, 'w');
+  
+  window.location.hash = 'gallery';
 }
 
 // ========== СОБЫТИЯ ==========
@@ -288,6 +369,20 @@ botContainer.addEventListener('click', handleBotClick);
 fullscreen.addEventListener('click', () => {
   fullscreen.classList.add('hidden');
   fullscreenImg.src = '';
+});
+
+// Обработка глубоких ссылок при загрузке
+window.addEventListener('load', () => {
+  const hash = window.location.hash;
+  if (hash) {
+    // Если есть hash, запоминаем и обработаем после загрузки меню
+    pendingHash = hash;
+  }
+});
+
+// Слушаем изменения hash (если пользователь меняет вручную)
+window.addEventListener('hashchange', () => {
+  handleDeepLink(window.location.hash);
 });
 
 // ========== СТАРТ ==========
