@@ -26,13 +26,6 @@ const wGallery = document.getElementById('w-gallery');
 // Динамические массивы
 let botCrystals = [];
 let botOptions = [];
-let allRulesImages = [];
-let allGalleryCards = [];
-
-// Флаги загрузки (сбрасываем при старте)
-let menuLoaded = false;
-let rulesLoaded = false;
-let galleryLoaded = false;
 
 // Текущий экран
 let currentScreen = 'menu';
@@ -52,34 +45,27 @@ function getTelegramStartParam() {
 }
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
-function loadImages(container, baseName, startNumber = 1, onClick = null, collectInArray = null) {
-  // КРИТИЧНО ВАЖНО: очищаем контейнер и массив
-  if (container) {
-    container.innerHTML = '';
+function loadImages(container, baseName, startNumber = 1, onClick = null) {
+  if (!container) {
+    console.error('Контейнер не найден:', baseName);
+    return;
   }
-  if (collectInArray) {
-    collectInArray.length = 0;
-  }
+  
+  // Очищаем контейнер
+  container.innerHTML = '';
+  console.log(`Загрузка ${baseName}...`);
   
   let i = startNumber;
   let loadedCount = 0;
-  let isLoading = true;
   
   function loadNext() {
-    if (!isLoading) return;
-    
     const img = new Image();
     const currentIndex = i;
-    img.src = `${baseName} (${currentIndex}).png`;
+    const imgPath = `${baseName} (${currentIndex}).png`;
     
     img.onload = function() {
-      if (!isLoading) return;
-      
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
-      img.setAttribute('data-index', currentIndex);
-      
-      if (collectInArray) collectInArray.push(img);
       
       if (onClick) {
         const handler = onClick(currentIndex);
@@ -89,24 +75,14 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
         }
       }
       
-      if (container) {
-        container.appendChild(img);
-      }
-      
+      container.appendChild(img);
       loadedCount++;
       i++;
       loadNext();
     };
     
     img.onerror = function() {
-      if (!isLoading) return;
-      
-      isLoading = false;
       console.log(`Загружено ${loadedCount} изображений ${baseName}`);
-      
-      // Устанавливаем флаг загрузки
-      if (baseName === 'menu') menuLoaded = true;
-      if (baseName === 'rules') rulesLoaded = true;
       
       // Проверяем отложенную навигацию
       if (pendingHash) {
@@ -114,6 +90,8 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
         pendingHash = null;
       }
     };
+    
+    img.src = imgPath;
   }
   
   loadNext();
@@ -129,95 +107,105 @@ function checkImageExists(url) {
   });
 }
 
-function createCard(url, detailUrl, parentGallery, cardId) {
-  // Проверяем, нет ли уже такой карточки
-  if (document.getElementById(cardId)) {
+async function loadGallery() {
+  if (!mainGallery || !pGallery || !aGallery || !wGallery) {
+    console.error('Элементы галереи не найдены');
     return;
   }
   
-  const cardContainer = document.createElement('div');
-  cardContainer.className = 'card-container';
-  cardContainer.id = cardId;
-
-  const img = document.createElement('img');
-  img.src = `gallery/${url}`;
-  img.alt = `Карта`;
-  img.className = 'card-image';
-  img.loading = 'lazy';
-  img.style.cursor = 'default';
-
-  checkImageExists(`gallery/${detailUrl}`).then((exists) => {
-    if (exists) {
-      const cornerImg = document.createElement('img');
-      cornerImg.src = 'gallery/corner.jpg';
-      cornerImg.alt = 'Уголок';
-      cornerImg.className = 'corner-image';
-      cardContainer.appendChild(cornerImg);
-
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => {
-        fullscreenImg.src = `gallery/${detailUrl}`;
-        fullscreen.classList.remove('hidden');
-      });
-    }
-  });
-
-  img.onerror = () => {
-    if (cardContainer.parentNode) {
-      cardContainer.remove();
-    }
-  };
+  console.log('Загрузка галереи...');
   
-  cardContainer.appendChild(img);
-  parentGallery.appendChild(cardContainer);
-  allGalleryCards.push(cardContainer);
-}
-
-async function loadMainGallery() {
-  // Очищаем всё перед загрузкой
-  if (mainGallery) {
-    mainGallery.innerHTML = '';
-  }
-  allGalleryCards = [];
+  // Очищаем все галереи
+  mainGallery.innerHTML = '';
+  pGallery.innerHTML = '';
+  aGallery.innerHTML = '';
+  wGallery.innerHTML = '';
   
+  // Загружаем основную галерею (1.jpg, 2.jpg...)
   for (let i = 1; i <= 200; i++) {
-    const baseUrl = `${i}.jpg`;
-    if (await checkImageExists(`gallery/${baseUrl}`)) {
-      createCard(baseUrl, `d${i}.jpg`, mainGallery, `gallery-card-${i}`);
+    const baseUrl = `gallery/${i}.jpg`;
+    if (await checkImageExists(baseUrl)) {
+      const img = document.createElement('img');
+      img.src = baseUrl;
+      img.alt = `Карта ${i}`;
+      img.className = 'card-image';
+      img.loading = 'lazy';
+      
+      // Проверяем наличие детального изображения
+      const detailUrl = `gallery/d${i}.jpg`;
+      if (await checkImageExists(detailUrl)) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+          fullscreenImg.src = detailUrl;
+          fullscreen.classList.remove('hidden');
+        });
+      }
+      
+      mainGallery.appendChild(img);
     }
     
+    // Загружаем варианты a, b, c
     for (let letter of ['a', 'b', 'c']) {
-      const variantUrl = `${i}${letter}.jpg`;
-      if (await checkImageExists(`gallery/${variantUrl}`)) {
-        createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery, `gallery-card-${i}${letter}`);
+      const variantUrl = `gallery/${i}${letter}.jpg`;
+      if (await checkImageExists(variantUrl)) {
+        const img = document.createElement('img');
+        img.src = variantUrl;
+        img.alt = `Карта ${i}${letter}`;
+        img.className = 'card-image';
+        img.loading = 'lazy';
+        
+        const detailUrl = `gallery/d${i}${letter}.jpg`;
+        if (await checkImageExists(detailUrl)) {
+          img.style.cursor = 'pointer';
+          img.addEventListener('click', () => {
+            fullscreenImg.src = detailUrl;
+            fullscreen.classList.remove('hidden');
+          });
+        }
+        
+        mainGallery.appendChild(img);
+      }
+    }
+  }
+  
+  // Загружаем серии p, a, w
+  const series = [
+    { prefix: 'p', gallery: pGallery },
+    { prefix: 'a', gallery: aGallery },
+    { prefix: 'w', gallery: wGallery }
+  ];
+  
+  for (let s of series) {
+    for (let i = 1; i <= 100; i++) {
+      const url = `gallery/${s.prefix}${i}.jpg`;
+      if (await checkImageExists(url)) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Карта ${s.prefix}${i}`;
+        img.className = 'card-image';
+        img.loading = 'lazy';
+        
+        const detailUrl = `gallery/d${s.prefix}${i}.jpg`;
+        if (await checkImageExists(detailUrl)) {
+          img.style.cursor = 'pointer';
+          img.addEventListener('click', () => {
+            fullscreenImg.src = detailUrl;
+            fullscreen.classList.remove('hidden');
+          });
+        }
+        
+        s.gallery.appendChild(img);
       } else {
         break;
       }
     }
   }
   
-  galleryLoaded = true;
+  console.log('Галерея загружена');
   
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
-  }
-}
-
-async function loadSeriesGallery(prefix, galleryElement, seriesName) {
-  if (!galleryElement) return;
-  
-  // Очищаем перед загрузкой
-  galleryElement.innerHTML = '';
-  
-  for (let i = 1; i <= 100; i++) {
-    const url = `${prefix}${i}.jpg`;
-    const detailUrl = `d${prefix}${i}.jpg`;
-    if (await checkImageExists(`gallery/${url}`)) {
-      createCard(url, detailUrl, galleryElement, `gallery-${seriesName}-${i}`);
-    } else {
-      break;
-    }
   }
 }
 
@@ -231,33 +219,13 @@ function handleDeepLink(hash) {
   
   if (target.startsWith('rules-')) {
     showRules();
-    
-    // Ждём загрузки и скроллим
-    const checkExist = setInterval(() => {
-      const targetImg = document.getElementById(`rules-${target.replace('rules-', '')}`);
-      if (targetImg) {
-        targetImg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        clearInterval(checkExist);
-      }
-    }, 100);
   }
-  
   else if (target.startsWith('gallery-')) {
     showGallery();
-    
-    const checkExist = setInterval(() => {
-      const targetCard = document.getElementById(target);
-      if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        clearInterval(checkExist);
-      }
-    }, 100);
   }
-  
   else if (target === 'bot') {
     showBot();
   }
-  
   else if (target === 'menu') {
     showMenu();
   }
@@ -346,8 +314,7 @@ function handleBotClick() {
 
 // ========== ПОКАЗ ЭКРАНОВ ==========
 function showMenu() {
-  if (currentScreen === 'menu') return;
-  
+  console.log('Показ меню');
   currentScreen = 'menu';
   menuScreen.style.display = 'block';
   rulesScreen.style.display = 'none';
@@ -355,20 +322,16 @@ function showMenu() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  // Принудительно загружаем меню при первом входе
-  if (!menuLoaded) {
-    loadImages(imageContainer, 'menu', 1, function(index) {
-      if (index === 3) return showRules;
-      if (index === 4) return showBot;
-      if (index === 5) return showGallery;
-      return null;
-    });
-  }
+  loadImages(imageContainer, 'menu', 1, function(index) {
+    if (index === 3) return showRules;
+    if (index === 4) return showBot;
+    if (index === 5) return showGallery;
+    return null;
+  });
 }
 
 function showRules() {
-  if (currentScreen === 'rules') return;
-  
+  console.log('Показ правил');
   currentScreen = 'rules';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'block';
@@ -376,14 +339,11 @@ function showRules() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  if (!rulesLoaded) {
-    loadImages(rulesContainer, 'rules', 1, null, allRulesImages);
-  }
+  loadImages(rulesContainer, 'rules');
 }
 
 function showBot() {
-  if (currentScreen === 'bot') return;
-  
+  console.log('Показ бота');
   currentScreen = 'bot';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
@@ -395,13 +355,11 @@ function showBot() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
-  // Бот всегда перезагружает данные
   loadBotCrystals();
 }
 
 function showGallery() {
-  if (currentScreen === 'gallery') return;
-  
+  console.log('Показ галереи');
   currentScreen = 'gallery';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
@@ -409,12 +367,7 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  // Принудительно очищаем и загружаем галерею
-  galleryLoaded = false;
-  loadMainGallery();
-  loadSeriesGallery('p', pGallery, 'p');
-  loadSeriesGallery('a', aGallery, 'a');
-  loadSeriesGallery('w', wGallery, 'w');
+  loadGallery();
 }
 
 // ========== СОБЫТИЯ ==========
@@ -427,13 +380,11 @@ fullscreen.addEventListener('click', () => {
 });
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
-// Сбрасываем флаги при старте
-menuLoaded = false;
-rulesLoaded = false;
-galleryLoaded = false;
+console.log('Приложение запущено');
 
 const startParam = getTelegramStartParam();
 if (startParam) {
+  console.log('Start param:', startParam);
   pendingHash = '#' + startParam;
 }
 
