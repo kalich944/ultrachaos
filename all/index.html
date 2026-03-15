@@ -41,17 +41,29 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Ultrachaos App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultrachaos Mini App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="container">
-    <img id="opening-screen" src="bot open.jpg" alt="Начальный экран">
-    <img id="crystal" src="bot crys (1).jpg" alt="Кристалл">
-    <img id="option" src="bot (1).jpg" alt="Опция боя">
+  <!-- Главное меню -->
+  <div id="menu-screen" class="screen">
+    <div id="imageContainer"></div>
   </div>
-  <img src="close.png" id="closeButton">
+  
+  <!-- Подприложение правил -->
+  <div id="rules-screen" class="screen" style="display: none;">
+    <div id="rulesContainer" class="image-container"></div>
+  </div>
+  
+  <!-- Подприложение бота -->
+  <div id="bot-screen" class="screen" style="display: none;">
+    <div id="botContainer" class="image-container"></div>
+  </div>
+  
+  <!-- Крестик -->
+  <img src="close.png" id="closeButton" style="display: none;">
+  
   <script src="script.js"></script>
 </body>
 </html>
