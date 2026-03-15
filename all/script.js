@@ -4,17 +4,27 @@ const rulesScreen = document.getElementById('rules-screen');
 const botScreen = document.getElementById('bot-screen');
 const closeButton = document.getElementById('closeButton');
 
-// Контейнеры для изображений
+// Контейнеры
 const imageContainer = document.getElementById('imageContainer');
 const rulesContainer = document.getElementById('rulesContainer');
+
+// Элементы бота
 const botContainer = document.getElementById('botContainer');
+const botOpening = document.getElementById('bot-opening');
+const botCrystal = document.getElementById('bot-crystal');
+const botOption = document.getElementById('bot-option');
+
+// Данные для бота
+const botCrystals = Array.from({length: 8}, (_, i) => `bot crys (${i+1}).jpg`);
+const botOptions = Array.from({length: 20}, (_, i) => `bot (${i+1}).jpg`);
 
 // Текущий экран
 let currentScreen = 'menu';
+let botFirstClick = true;
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null) {
-  container.innerHTML = ''; // Очищаем
+  container.innerHTML = '';
   
   let i = startNumber;
   
@@ -26,15 +36,17 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
       
-      // Если передана функция-обработчик клика
-      if (onClick && onClick(currentIndex)) {
-        img.addEventListener('click', onClick(currentIndex));
-        img.style.cursor = 'pointer';
+      if (onClick) {
+        const handler = onClick(currentIndex);
+        if (handler) {
+          img.addEventListener('click', handler);
+          img.style.cursor = 'pointer';
+        }
       }
       
       container.appendChild(img);
       i++;
-      loadNext(); // Загружаем следующее
+      loadNext();
     };
     
     img.onerror = function() {
@@ -45,65 +57,26 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
   loadNext();
 }
 
-// ========== СПЕЦИАЛЬНАЯ ЗАГРУЗКА ДЛЯ БОТА ==========
-function loadBotImages() {
-  botContainer.innerHTML = '';
+// ========== ФУНКЦИИ БОТА ==========
+function initBot() {
+  botFirstClick = true;
+  botOpening.style.display = 'block';
+  botCrystal.style.display = 'none';
+  botOption.style.display = 'none';
+}
+
+function handleBotClick() {
+  if (botFirstClick) {
+    botOpening.style.display = 'none';
+    botCrystal.style.display = 'block';
+    botOption.style.display = 'block';
+    botFirstClick = false;
+  }
   
-  // Сначала загружаем bot open.jpg
-  const openImg = new Image();
-  openImg.src = 'bot open.jpg';
-  openImg.onload = function() {
-    openImg.style.width = '100%';
-    openImg.style.height = 'auto';
-    openImg.style.display = 'block';
-    botContainer.appendChild(openImg);
-    
-    // Затем пробуем загрузить bot crys (1).jpg, bot crys (2).jpg...
-    let i = 1;
-    
-    function loadNextCrystal() {
-      const crystalImg = new Image();
-      crystalImg.src = `bot crys (${i}).jpg`;
-      
-      crystalImg.onload = function() {
-        crystalImg.style.width = '100%';
-        crystalImg.style.height = 'auto';
-        crystalImg.style.display = 'block';
-        botContainer.appendChild(crystalImg);
-        i++;
-        loadNextCrystal();
-      };
-      
-      crystalImg.onerror = function() {
-        console.log(`Загружено ${i-1} кристаллов`);
-        
-        // После кристаллов загружаем bot (1).jpg, bot (2).jpg...
-        let j = 1;
-        
-        function loadNextOption() {
-          const optionImg = new Image();
-          optionImg.src = `bot (${j}).jpg`;
-          
-          optionImg.onload = function() {
-            optionImg.style.width = '100%';
-            optionImg.style.height = 'auto';
-            optionImg.style.display = 'block';
-            botContainer.appendChild(optionImg);
-            j++;
-            loadNextOption();
-          };
-          
-          optionImg.onerror = function() {
-            console.log(`Загружено ${j-1} опций боя`);
-          };
-        }
-        
-        loadNextOption();
-      };
-    }
-    
-    loadNextCrystal();
-  };
+  const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
+  const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
+  botCrystal.src = randomCrystal;
+  botOption.src = randomOption;
 }
 
 // ========== ПОКАЗ ЭКРАНОВ ==========
@@ -114,10 +87,9 @@ function showMenu() {
   botScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  // Загружаем меню: menu (1).png, menu (2).png...
   loadImages(imageContainer, 'menu', 1, function(index) {
-    if (index === 3) return function() { showRules(); };
-    if (index === 4) return function() { showBot(); };
+    if (index === 3) return showRules;
+    if (index === 4) return showBot;
     return null;
   });
 }
@@ -129,7 +101,6 @@ function showRules() {
   botScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  // Загружаем правила: rules (1).png, rules (2).png...
   loadImages(rulesContainer, 'rules');
 }
 
@@ -140,12 +111,12 @@ function showBot() {
   botScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  // Загружаем бота
-  loadBotImages();
+  initBot();
 }
 
-// ========== КРЕСТИК ==========
+// ========== СОБЫТИЯ ==========
 closeButton.addEventListener('click', showMenu);
+botContainer.addEventListener('click', handleBotClick);
 
 // ========== СТАРТ ==========
 showMenu();
