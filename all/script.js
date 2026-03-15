@@ -39,9 +39,20 @@ let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
 
+// ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
+function getTelegramStartParam() {
+  try {
+    if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+      return window.Telegram.WebApp.initDataUnsafe.start_param;
+    }
+  } catch (e) {
+    console.log('Не удалось прочитать start_param');
+  }
+  return null;
+}
+
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null, collectInArray = null) {
-  // Очищаем контейнер и массив
   container.innerHTML = '';
   if (collectInArray) collectInArray.length = 0;
   
@@ -77,11 +88,9 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
     img.onerror = function() {
       console.log(`Загружено ${loadedCount} изображений ${baseName}`);
       
-      // Устанавливаем флаг загрузки
       if (baseName === 'menu') menuLoaded = true;
       if (baseName === 'rules') rulesLoaded = true;
       
-      // После загрузки проверяем навигацию
       if (pendingHash) {
         handleDeepLink(pendingHash);
         pendingHash = null;
@@ -103,7 +112,6 @@ function checkImageExists(url) {
 }
 
 function createCard(url, detailUrl, parentGallery, cardId) {
-  // Проверяем, не существует ли уже такой карточки
   if (document.getElementById(cardId)) return;
   
   const cardContainer = document.createElement('div');
@@ -141,7 +149,6 @@ function createCard(url, detailUrl, parentGallery, cardId) {
 }
 
 async function loadMainGallery() {
-  // Очищаем всё
   mainGallery.innerHTML = '';
   allGalleryCards = [];
   
@@ -151,7 +158,6 @@ async function loadMainGallery() {
       createCard(baseUrl, `d${i}.jpg`, mainGallery, `gallery-card-${i}`);
     }
     
-    // Загружаем варианты a, b, c
     for (let letter of ['a', 'b', 'c']) {
       const variantUrl = `${i}${letter}.jpg`;
       if (await checkImageExists(`gallery/${variantUrl}`)) {
@@ -162,7 +168,6 @@ async function loadMainGallery() {
   
   galleryLoaded = true;
   
-  // После загрузки проверяем навигацию
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
@@ -170,7 +175,6 @@ async function loadMainGallery() {
 }
 
 async function loadSeriesGallery(prefix, galleryElement, seriesName) {
-  // Очищаем
   galleryElement.innerHTML = '';
   
   for (let i = 1; i <= 100; i++) {
@@ -190,22 +194,20 @@ function handleDeepLink(hash) {
   
   console.log('Обработка ссылки:', hash);
   
-  // Убираем #
-  const target = hash.substring(1);
+  const target = hash.startsWith('#') ? hash.substring(1) : hash;
   
-  // Правила: rules-5
   if (target.startsWith('rules-')) {
+    const ruleNumber = target.replace('rules-', '');
     showRules();
     
     setTimeout(() => {
-      const targetImg = document.getElementById(target);
+      const targetImg = document.getElementById(`rules-${ruleNumber}`);
       if (targetImg) {
         targetImg.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 500);
   }
   
-  // Галерея: gallery-card-123 или gallery-p-42
   else if (target.startsWith('gallery-')) {
     showGallery();
     
@@ -217,12 +219,10 @@ function handleDeepLink(hash) {
     }, 1000);
   }
   
-  // Бот: bot
   else if (target === 'bot') {
     showBot();
   }
   
-  // Меню: menu
   else if (target === 'menu') {
     showMenu();
   }
@@ -311,7 +311,7 @@ function handleBotClick() {
 
 // ========== ПОКАЗ ЭКРАНОВ ==========
 function showMenu() {
-  if (currentScreen === 'menu') return; // Уже на этом экране
+  if (currentScreen === 'menu') return;
   
   currentScreen = 'menu';
   menuScreen.style.display = 'block';
@@ -320,7 +320,6 @@ function showMenu() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  // Загружаем только если ещё не загружено
   if (!menuLoaded) {
     loadImages(imageContainer, 'menu', 1, function(index) {
       if (index === 3) return showRules;
@@ -329,8 +328,6 @@ function showMenu() {
       return null;
     });
   }
-  
-  window.location.hash = 'menu';
 }
 
 function showRules() {
@@ -346,8 +343,6 @@ function showRules() {
   if (!rulesLoaded) {
     loadImages(rulesContainer, 'rules', 1, null, allRulesImages);
   }
-  
-  window.location.hash = 'rules';
 }
 
 function showBot() {
@@ -364,10 +359,7 @@ function showBot() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
-  // Бот всегда перезагружает данные при входе
   loadBotCrystals();
-  
-  window.location.hash = 'bot';
 }
 
 function showGallery() {
@@ -380,15 +372,12 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  // Загружаем только если ещё не загружено
   if (!galleryLoaded) {
     loadMainGallery();
     loadSeriesGallery('p', pGallery, 'p');
     loadSeriesGallery('a', aGallery, 'a');
     loadSeriesGallery('w', wGallery, 'w');
   }
-  
-  window.location.hash = 'gallery';
 }
 
 // ========== СОБЫТИЯ ==========
@@ -400,17 +389,10 @@ fullscreen.addEventListener('click', () => {
   fullscreenImg.src = '';
 });
 
-// Обработка глубоких ссылок при загрузке
-window.addEventListener('load', () => {
-  const hash = window.location.hash;
-  if (hash) {
-    pendingHash = hash;
-  }
-});
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+const startParam = getTelegramStartParam();
+if (startParam) {
+  pendingHash = '#' + startParam;
+}
 
-window.addEventListener('hashchange', () => {
-  handleDeepLink(window.location.hash);
-});
-
-// ========== СТАРТ ==========
 showMenu();
