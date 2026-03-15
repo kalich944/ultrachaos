@@ -29,7 +29,7 @@ let botOptions = [];
 let allRulesImages = [];
 let allGalleryCards = [];
 
-// Флаги загрузки
+// Флаги загрузки (сбрасываем при старте)
 let menuLoaded = false;
 let rulesLoaded = false;
 let galleryLoaded = false;
@@ -53,18 +53,28 @@ function getTelegramStartParam() {
 
 // ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
 function loadImages(container, baseName, startNumber = 1, onClick = null, collectInArray = null) {
-  container.innerHTML = '';
-  if (collectInArray) collectInArray.length = 0;
+  // КРИТИЧНО ВАЖНО: очищаем контейнер и массив
+  if (container) {
+    container.innerHTML = '';
+  }
+  if (collectInArray) {
+    collectInArray.length = 0;
+  }
   
   let i = startNumber;
   let loadedCount = 0;
+  let isLoading = true;
   
   function loadNext() {
+    if (!isLoading) return;
+    
     const img = new Image();
     const currentIndex = i;
     img.src = `${baseName} (${currentIndex}).png`;
     
     img.onload = function() {
+      if (!isLoading) return;
+      
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
       img.setAttribute('data-index', currentIndex);
@@ -79,18 +89,26 @@ function loadImages(container, baseName, startNumber = 1, onClick = null, collec
         }
       }
       
-      container.appendChild(img);
+      if (container) {
+        container.appendChild(img);
+      }
+      
       loadedCount++;
       i++;
       loadNext();
     };
     
     img.onerror = function() {
+      if (!isLoading) return;
+      
+      isLoading = false;
       console.log(`Загружено ${loadedCount} изображений ${baseName}`);
       
+      // Устанавливаем флаг загрузки
       if (baseName === 'menu') menuLoaded = true;
       if (baseName === 'rules') rulesLoaded = true;
       
+      // Проверяем отложенную навигацию
       if (pendingHash) {
         handleDeepLink(pendingHash);
         pendingHash = null;
@@ -112,7 +130,10 @@ function checkImageExists(url) {
 }
 
 function createCard(url, detailUrl, parentGallery, cardId) {
-  if (document.getElementById(cardId)) return;
+  // Проверяем, нет ли уже такой карточки
+  if (document.getElementById(cardId)) {
+    return;
+  }
   
   const cardContainer = document.createElement('div');
   cardContainer.className = 'card-container';
@@ -141,15 +162,22 @@ function createCard(url, detailUrl, parentGallery, cardId) {
     }
   });
 
-  img.onerror = () => cardContainer.remove();
+  img.onerror = () => {
+    if (cardContainer.parentNode) {
+      cardContainer.remove();
+    }
+  };
+  
   cardContainer.appendChild(img);
   parentGallery.appendChild(cardContainer);
-  
   allGalleryCards.push(cardContainer);
 }
 
 async function loadMainGallery() {
-  mainGallery.innerHTML = '';
+  // Очищаем всё перед загрузкой
+  if (mainGallery) {
+    mainGallery.innerHTML = '';
+  }
   allGalleryCards = [];
   
   for (let i = 1; i <= 200; i++) {
@@ -162,6 +190,8 @@ async function loadMainGallery() {
       const variantUrl = `${i}${letter}.jpg`;
       if (await checkImageExists(`gallery/${variantUrl}`)) {
         createCard(variantUrl, `d${i}${letter}.jpg`, mainGallery, `gallery-card-${i}${letter}`);
+      } else {
+        break;
       }
     }
   }
@@ -175,6 +205,9 @@ async function loadMainGallery() {
 }
 
 async function loadSeriesGallery(prefix, galleryElement, seriesName) {
+  if (!galleryElement) return;
+  
+  // Очищаем перед загрузкой
   galleryElement.innerHTML = '';
   
   for (let i = 1; i <= 100; i++) {
@@ -197,26 +230,28 @@ function handleDeepLink(hash) {
   const target = hash.startsWith('#') ? hash.substring(1) : hash;
   
   if (target.startsWith('rules-')) {
-    const ruleNumber = target.replace('rules-', '');
     showRules();
     
-    setTimeout(() => {
-      const targetImg = document.getElementById(`rules-${ruleNumber}`);
+    // Ждём загрузки и скроллим
+    const checkExist = setInterval(() => {
+      const targetImg = document.getElementById(`rules-${target.replace('rules-', '')}`);
       if (targetImg) {
         targetImg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        clearInterval(checkExist);
       }
-    }, 500);
+    }, 100);
   }
   
   else if (target.startsWith('gallery-')) {
     showGallery();
     
-    setTimeout(() => {
+    const checkExist = setInterval(() => {
       const targetCard = document.getElementById(target);
       if (targetCard) {
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        clearInterval(checkExist);
       }
-    }, 1000);
+    }, 100);
   }
   
   else if (target === 'bot') {
@@ -320,6 +355,7 @@ function showMenu() {
   galleryScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
+  // Принудительно загружаем меню при первом входе
   if (!menuLoaded) {
     loadImages(imageContainer, 'menu', 1, function(index) {
       if (index === 3) return showRules;
@@ -359,6 +395,7 @@ function showBot() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   
+  // Бот всегда перезагружает данные
   loadBotCrystals();
 }
 
@@ -372,12 +409,12 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   closeButton.style.display = 'block';
   
-  if (!galleryLoaded) {
-    loadMainGallery();
-    loadSeriesGallery('p', pGallery, 'p');
-    loadSeriesGallery('a', aGallery, 'a');
-    loadSeriesGallery('w', wGallery, 'w');
-  }
+  // Принудительно очищаем и загружаем галерею
+  galleryLoaded = false;
+  loadMainGallery();
+  loadSeriesGallery('p', pGallery, 'p');
+  loadSeriesGallery('a', aGallery, 'a');
+  loadSeriesGallery('w', wGallery, 'w');
 }
 
 // ========== СОБЫТИЯ ==========
@@ -390,9 +427,15 @@ fullscreen.addEventListener('click', () => {
 });
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
+// Сбрасываем флаги при старте
+menuLoaded = false;
+rulesLoaded = false;
+galleryLoaded = false;
+
 const startParam = getTelegramStartParam();
 if (startParam) {
   pendingHash = '#' + startParam;
 }
 
+// Запускаем меню
 showMenu();
