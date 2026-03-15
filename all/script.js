@@ -14,8 +14,8 @@ const botOpening = document.getElementById('bot-opening');
 const botCrystal = document.getElementById('bot-crystal');
 const botOption = document.getElementById('bot-option');
 
-// Данные для бота
-const botCrystals = Array.from({length: 8}, (_, i) => `bot crys (${i+1}).jpg`);
+// Данные для бота (исправлено на .JPG для кристаллов)
+const botCrystals = Array.from({length: 8}, (_, i) => `bot crys (${i+1}).JPG`);
 const botOptions = Array.from({length: 20}, (_, i) => `bot (${i+1}).jpg`);
 
 // Текущий экран
@@ -63,6 +63,9 @@ function initBot() {
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
+  // Устанавливаем начальные изображения
+  botCrystal.src = 'bot crys (1).JPG';
+  botOption.src = 'bot (1).jpg';
 }
 
 function handleBotClick() {
