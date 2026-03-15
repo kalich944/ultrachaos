@@ -1,37 +1,28 @@
 const imageContainer = document.getElementById('imageContainer');
 
-// Функция для добавления изображений
-async function loadImages() {
+function loadImages() {
   let i = 1;
-  let hasMoreImages = true;
   
-  while (hasMoreImages) {
-    // Пробуем загрузить изображение menu (i).png
-    const imgPath = `menu (${i}).png`;
+  function tryLoadNext() {
+    const img = new Image();
+    const imgPath = `rules (${i}).png`; // Ищем rules (1).png, rules (2).png...
     
-    try {
-      // Создаём объект Image для проверки существования файла
-      const img = new Image();
-      
-      // Ждём, пока загрузится или вызовет ошибку
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = imgPath;
-      });
-      
-      // Если успешно — добавляем на страницу
-      img.alt = `Меню ${i}`;
+    img.onload = function() {
+      img.alt = `Правило ${i}`;
       imageContainer.appendChild(img);
-      
-      i++; // Переходим к следующему номеру
-      
-    } catch (error) {
-      // Если изображение не нашлось — останавливаем цикл
-      hasMoreImages = false;
-    }
+      i++;
+      tryLoadNext(); // Загружаем следующий номер
+    };
+    
+    img.onerror = function() {
+      console.log(`Загружено ${i-1} правил`);
+      // Можно добавить скрытый текст или заглушку, если нужно
+    };
+    
+    img.src = imgPath;
   }
+  
+  tryLoadNext();
 }
 
-// Загружаем изображения при старте
 loadImages();
