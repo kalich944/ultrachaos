@@ -52,7 +52,8 @@ function loadRandomMenuImage() {
   
   imageContainer.innerHTML = '';
   
-  const variants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
+  // Пути с учётом папки all/
+  const variants = ['all/menu (1a).png', 'all/menu (1b).png', 'all/menu (1c).png'];
   const randomIndex = Math.floor(Math.random() * variants.length);
   const selectedImage = variants[randomIndex];
   
@@ -82,7 +83,7 @@ function loadImages(container, baseName, startNumber = 1) {
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
-    const imgPath = `${baseName} (${currentIndex}).png`;
+    const imgPath = `all/${baseName} (${currentIndex}).png`;
     
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
@@ -130,7 +131,7 @@ async function loadGallery() {
   aGallery.innerHTML = '';
   wGallery.innerHTML = '';
   
-  const galleryPath = 'gallery/';
+  const galleryPath = 'all/gallery/';
   
   for (let i = 1; i <= 200; i++) {
     const baseUrl = `${galleryPath}${i}.jpg`;
@@ -249,7 +250,7 @@ function loadBotCrystals() {
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
-    const imgPath = `bot crys (${currentIndex}).JPG`;
+    const imgPath = `all/bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
       botCrystals.push(imgPath);
@@ -275,7 +276,7 @@ function loadBotOptions() {
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
-    const imgPath = `bot (${currentIndex}).jpg`;
+    const imgPath = `all/bot (${currentIndex}).jpg`;
     
     img.onload = function() {
       botOptions.push(imgPath);
