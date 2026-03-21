@@ -25,10 +25,6 @@ const pGallery = document.getElementById('p-gallery');
 const aGallery = document.getElementById('a-gallery');
 const wGallery = document.getElementById('w-gallery');
 
-// Рамки
-const frameTop = document.getElementById('frameTop');
-const frameDown = document.getElementById('frameDown');
-
 // Динамические массивы
 let botCrystals = [];
 let botOptions = [];
@@ -365,10 +361,6 @@ function showMenu() {
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  // Показываем рамки
-  frameTop.style.display = 'block';
-  frameDown.style.display = 'block';
-  
   loadMenuImages();
 }
 
@@ -381,10 +373,6 @@ function showRules() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
-  // Показываем рамки
-  frameTop.style.display = 'block';
-  frameDown.style.display = 'block';
   
   loadImages(rulesContainer, 'rules');
 }
@@ -399,10 +387,6 @@ function showAbout() {
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
-  // Показываем рамки
-  frameTop.style.display = 'block';
-  frameDown.style.display = 'block';
-  
   loadImages(aboutContainer, 'about');
 }
 
@@ -415,10 +399,6 @@ function showBot() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
-  // Скрываем рамки
-  frameTop.style.display = 'none';
-  frameDown.style.display = 'none';
   
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
@@ -436,10 +416,6 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
-  // Показываем рамки
-  frameTop.style.display = 'block';
-  frameDown.style.display = 'block';
   
   loadGallery();
 }
