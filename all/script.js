@@ -120,17 +120,51 @@ function loadImages(container, baseName, startNumber = 1) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ ==========
-function checkImageExists(url) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = url;
+// ========== ГАЛЕРЕЯ (оптимизированная, с уголками) ==========
+
+// Функция добавления карты с уголком, если есть детальная версия
+function addCardWithCorner(container, imageUrl, detailUrl, alt) {
+  const cardDiv = document.createElement('div');
+  cardDiv.style.position = 'relative';
+  cardDiv.style.display = 'inline-block';
+  cardDiv.style.width = '100%';
+  
+  const img = document.createElement('img');
+  img.src = imageUrl;
+  img.alt = alt;
+  img.className = 'card-image';
+  img.style.width = '100%';
+  img.style.height = 'auto';
+  img.style.display = 'block';
+  
+  // Клик для зума
+  img.style.cursor = 'pointer';
+  img.addEventListener('click', () => {
+    fullscreenImg.src = detailUrl || imageUrl;
+    fullscreen.classList.remove('hidden');
   });
+  
+  cardDiv.appendChild(img);
+  
+  // Если есть детальная версия — добавляем уголок
+  if (detailUrl) {
+    const cornerImg = document.createElement('img');
+    cornerImg.src = 'gallery/corner.jpg';
+    cornerImg.alt = 'подробности';
+    cornerImg.style.position = 'absolute';
+    cornerImg.style.top = '0';
+    cornerImg.style.right = '0';
+    cornerImg.style.width = '12.5%';
+    cornerImg.style.height = 'auto';
+    cornerImg.style.pointerEvents = 'none';
+    cardDiv.appendChild(cornerImg);
+  }
+  
+  container.appendChild(cardDiv);
 }
 
-async function loadGallery() {
+// Оптимизированная загрузка галереи (параллельная)
+function loadGallery() {
   if (!mainGallery || !pGallery || !aGallery || !wGallery) {
     console.error('Элементы галереи не найдены');
     return;
@@ -145,50 +179,41 @@ async function loadGallery() {
   
   const galleryPath = 'gallery/';
   
+  // Функция проверки существования файла (параллельная)
+  function checkFileExists(url, callback) {
+    const img = new Image();
+    img.onload = () => callback(true);
+    img.onerror = () => callback(false);
+    img.src = url;
+  }
+  
+  // Загружаем основную галерею (1.jpg, 1a.jpg, 1b.jpg, 1c.jpg)
   for (let i = 1; i <= 200; i++) {
     const baseUrl = `${galleryPath}${i}.jpg`;
-    if (await checkImageExists(baseUrl)) {
-      const img = document.createElement('img');
-      img.src = baseUrl;
-      img.alt = `Карта ${i}`;
-      img.className = 'card-image';
-      img.loading = 'lazy';
-      
-      const detailUrl = `${galleryPath}d${i}.jpg`;
-      if (await checkImageExists(detailUrl)) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', () => {
-          fullscreenImg.src = detailUrl;
-          fullscreen.classList.remove('hidden');
+    checkFileExists(baseUrl, (exists) => {
+      if (exists) {
+        const detailUrl = `${galleryPath}d${i}.jpg`;
+        checkFileExists(detailUrl, (hasDetail) => {
+          addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
         });
       }
-      
-      mainGallery.appendChild(img);
-    }
+    });
     
+    // Варианты a, b, c
     for (let letter of ['a', 'b', 'c']) {
       const variantUrl = `${galleryPath}${i}${letter}.jpg`;
-      if (await checkImageExists(variantUrl)) {
-        const img = document.createElement('img');
-        img.src = variantUrl;
-        img.alt = `Карта ${i}${letter}`;
-        img.className = 'card-image';
-        img.loading = 'lazy';
-        
-        const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
-        if (await checkImageExists(detailUrl)) {
-          img.style.cursor = 'pointer';
-          img.addEventListener('click', () => {
-            fullscreenImg.src = detailUrl;
-            fullscreen.classList.remove('hidden');
+      checkFileExists(variantUrl, (exists) => {
+        if (exists) {
+          const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
+          checkFileExists(detailUrl, (hasDetail) => {
+            addCardWithCorner(mainGallery, variantUrl, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
           });
         }
-        
-        mainGallery.appendChild(img);
-      }
+      });
     }
   }
   
+  // Загружаем серии p, a, w
   const series = [
     { prefix: 'p', gallery: pGallery },
     { prefix: 'a', gallery: aGallery },
@@ -198,35 +223,18 @@ async function loadGallery() {
   for (let s of series) {
     for (let i = 1; i <= 100; i++) {
       const url = `${galleryPath}${s.prefix}${i}.jpg`;
-      if (await checkImageExists(url)) {
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = `Карта ${s.prefix}${i}`;
-        img.className = 'card-image';
-        img.loading = 'lazy';
-        
-        const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
-        if (await checkImageExists(detailUrl)) {
-          img.style.cursor = 'pointer';
-          img.addEventListener('click', () => {
-            fullscreenImg.src = detailUrl;
-            fullscreen.classList.remove('hidden');
+      checkFileExists(url, (exists) => {
+        if (exists) {
+          const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
+          checkFileExists(detailUrl, (hasDetail) => {
+            addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
           });
         }
-        
-        s.gallery.appendChild(img);
-      } else {
-        break;
-      }
+      });
     }
   }
   
-  console.log('Галерея загружена');
-  
-  if (pendingHash && pendingHash.startsWith('#gallery-')) {
-    handleDeepLink(pendingHash);
-    pendingHash = null;
-  }
+  console.log('Галерея начала загрузку');
 }
 
 // ========== ГЛУБОКИЕ ССЫЛКИ ==========
