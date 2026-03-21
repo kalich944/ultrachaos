@@ -13,6 +13,38 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Для компьютеров: ограничиваем ширину контента */
+@media screen and (min-width: 768px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000;
+  }
+  
+  .screen {
+    width: 33.33%;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #000000;
+  }
+  
+  .frame {
+    width: 33.33%;
+    min-width: 300px;
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  #closeButton {
+    right: auto;
+    left: 50%;
+    transform: translateX(calc(16.66% - 20px));
+  }
+}
+
 /* Рамки */
 .frame {
   position: fixed;
@@ -71,6 +103,17 @@ body {
   border: none;
 }
 
+/* Запрещаем зум для about */
+#aboutContainer.no-zoom {
+  touch-action: pan-y pinch-zoom;
+}
+
+#aboutContainer.no-zoom img {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Бот */
 .bot-wrapper {
   display: flex;
@@ -87,7 +130,7 @@ body {
   max-width: 1000px;
   height: auto;
   aspect-ratio: 1000 / 1529;
-  background-image: url('all/bot back.jpg');
+  background-image: url('bot back.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
