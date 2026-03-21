@@ -7,59 +7,61 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Верхняя рамка -->
-  <img src="frame top.png" id="frameTop" class="frame">
-  
-  <!-- Нижняя рамка -->
-  <img src="frame down.png" id="frameDown" class="frame">
-  
-  <!-- Крестик -->
-  <img src="close.png" id="closeButton">
-  
-  <!-- Главное меню -->
-  <div id="menu-screen" class="screen">
-    <div id="imageContainer"></div>
-  </div>
-  
-  <!-- Подприложение правил -->
-  <div id="rules-screen" class="screen" style="display: none;">
-    <div id="rulesContainer" class="image-container"></div>
-  </div>
-  
-  <!-- Подприложение "Об игре" -->
-  <div id="about-screen" class="screen" style="display: none;">
-    <div id="aboutContainer" class="image-container no-zoom"></div>
-  </div>
-  
-  <!-- Подприложение бота -->
-  <div id="bot-screen" class="screen" style="display: none;">
-    <div class="bot-wrapper">
-      <div id="botContainer">
-        <img id="bot-opening" src="bot open.png" alt="Начальный экран">
-        <img id="bot-crystal" src="bot crys (1).JPG" alt="Кристалл">
-        <img id="bot-option" src="bot (1).jpg" alt="Опция боя">
+  <div id="app-wrapper">
+    <!-- Верхняя рамка -->
+    <img src="frame top.png" id="frameTop" class="frame">
+    
+    <!-- Нижняя рамка -->
+    <img src="frame down.png" id="frameDown" class="frame">
+    
+    <!-- Крестик -->
+    <img src="close.png" id="closeButton">
+    
+    <!-- Главное меню -->
+    <div id="menu-screen" class="screen">
+      <div id="imageContainer"></div>
+    </div>
+    
+    <!-- Подприложение правил -->
+    <div id="rules-screen" class="screen" style="display: none;">
+      <div id="rulesContainer" class="image-container"></div>
+    </div>
+    
+    <!-- Подприложение "Об игре" -->
+    <div id="about-screen" class="screen" style="display: none;">
+      <div id="aboutContainer" class="image-container no-zoom"></div>
+    </div>
+    
+    <!-- Подприложение бота -->
+    <div id="bot-screen" class="screen" style="display: none;">
+      <div class="bot-wrapper">
+        <div id="botContainer">
+          <img id="bot-opening" src="bot open.png" alt="Начальный экран">
+          <img id="bot-crystal" src="bot crys (1).JPG" alt="Кристалл">
+          <img id="bot-option" src="bot (1).jpg" alt="Опция боя">
+        </div>
       </div>
     </div>
-  </div>
-  
-  <!-- Подприложение галереи -->
-  <div id="gallery-screen" class="screen" style="display: none;">
-    <div class="gallery-container">
-      <img src="gallery/top.jpg" alt="Ultrachaos Header" class="header-image" />
-      <div class="gallery-grid" id="main-gallery"></div>
-      <img src="gallery/pam.jpg" alt="Pam Image" class="pam-image" />
-      <div class="gallery-grid" id="p-gallery"></div>
-      <img src="gallery/archive.jpg" alt="Archive Image" class="archive-image" />
-      <div class="gallery-grid" id="a-gallery"></div>
-      <img src="gallery/weapon.jpg" alt="Weapon Image" class="weapon-image" />
-      <div class="gallery-grid" id="w-gallery"></div>
-      <img src="gallery/end.jpg" alt="End Image" class="end-image" />
+    
+    <!-- Подприложение галереи -->
+    <div id="gallery-screen" class="screen" style="display: none;">
+      <div class="gallery-container">
+        <img src="gallery/top.jpg" alt="Ultrachaos Header" class="header-image" />
+        <div class="gallery-grid" id="main-gallery"></div>
+        <img src="gallery/pam.jpg" alt="Pam Image" class="pam-image" />
+        <div class="gallery-grid" id="p-gallery"></div>
+        <img src="gallery/archive.jpg" alt="Archive Image" class="archive-image" />
+        <div class="gallery-grid" id="a-gallery"></div>
+        <img src="gallery/weapon.jpg" alt="Weapon Image" class="weapon-image" />
+        <div class="gallery-grid" id="w-gallery"></div>
+        <img src="gallery/end.jpg" alt="End Image" class="end-image" />
+      </div>
     </div>
-  </div>
-  
-  <!-- Полноэкранный режим для галереи -->
-  <div id="fullscreen" class="hidden">
-    <img id="fullscreen-img" src="" alt="Полноэкранная картинка" />
+    
+    <!-- Полноэкранный режим для галереи -->
+    <div id="fullscreen" class="hidden">
+      <img id="fullscreen-img" src="" alt="Полноэкранная картинка" />
+    </div>
   </div>
   
   <script src="script.js"></script>
