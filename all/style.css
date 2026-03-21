@@ -13,7 +13,7 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Общая обёртка — центрирование на компьютере */
+/* Общая обёртка */
 #app-wrapper {
   width: 100%;
   position: relative;
@@ -37,7 +37,7 @@ body {
   }
 }
 
-/* Рамки — абсолютно относительно обёртки */
+/* Рамки — всегда видны, позиционированы относительно обёртки */
 .frame {
   position: absolute;
   left: 0;
@@ -56,7 +56,7 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный, но привязан к ширине контента */
+/* Крестик — фиксированный */
 #closeButton {
   position: fixed;
   top: 0;
@@ -68,7 +68,7 @@ body {
   pointer-events: auto;
 }
 
-/* На мобильных — прижат к правому краю экрана */
+/* На мобильных — прижат к правому краю */
 @media screen and (max-width: 767px) {
   #closeButton {
     right: 0;
@@ -97,7 +97,7 @@ body {
   align-items: center;
 }
 
-/* Меню, правила, about — вертикальное выравнивание по центру */
+/* Меню, правила, about */
 #imageContainer, #rulesContainer, #aboutContainer {
   padding: 0;
   display: flex;
