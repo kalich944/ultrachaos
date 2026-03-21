@@ -241,3 +241,15 @@ body {
     padding: 20px 0;
   }
 }
+
+/* Скрываем рамки, когда активен экран бота */
+#bot-screen:not([style*="display: none"]) ~ .frame,
+#bot-screen:not([style*="display: none"]) ~ #closeButton {
+  display: none;
+}
+
+/* Альтернативный вариант — если рамки находятся вне .screen, скрываем их когда бот активен */
+body:has(#bot-screen[style*="display: flex"]) .frame,
+body:has(#bot-screen[style*="display: flex"]) #closeButton {
+  display: none;
+}
