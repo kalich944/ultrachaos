@@ -46,24 +46,51 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: случайное изображение из трёх ==========
+// ========== МЕНЮ: первое случайное, остальные с кликами ==========
 function loadRandomMenuImage() {
   if (!imageContainer) return;
   
   imageContainer.innerHTML = '';
   
-  const variants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
-  const randomIndex = Math.floor(Math.random() * variants.length);
-  const selectedImage = variants[randomIndex];
+  // Случайный выбор для первого изображения
+  const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
+  const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
   
-  const img = document.createElement('img');
-  img.src = selectedImage;
-  img.alt = 'Меню Ультрахаос';
-  img.style.width = '100%';
-  img.style.height = 'auto';
-  img.style.display = 'block';
+  // Загружаем первое (случайное)
+  const firstImg = document.createElement('img');
+  firstImg.src = randomFirst;
+  firstImg.alt = 'Меню 1';
+  firstImg.style.width = '100%';
+  firstImg.style.height = 'auto';
+  firstImg.style.display = 'block';
+  imageContainer.appendChild(firstImg);
   
-  imageContainer.appendChild(img);
+  // Загружаем остальные (2,3,4,5,6,7,8) с обработчиками кликов
+  for (let i = 2; i <= 8; i++) {
+    const img = document.createElement('img');
+    img.src = `menu (${i}).png`;
+    img.alt = `Меню ${i}`;
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    
+    // Назначаем обработчики кликов по номерам
+    if (i === 3) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => showBot());
+    } else if (i === 5) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => showRules());
+    } else if (i === 6) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => showGallery());
+    } else if (i === 7) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => showAbout());
+    }
+    
+    imageContainer.appendChild(img);
+  }
 }
 
 // ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ ==========
