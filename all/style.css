@@ -37,12 +37,6 @@ body {
     left: 50%;
     transform: translateX(-50%);
   }
-  
-  #closeButton {
-    right: auto;
-    left: 50%;
-    transform: translateX(calc(16.66% - 20px));
-  }
 }
 
 /* Рамки */
