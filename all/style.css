@@ -13,7 +13,13 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Для компьютеров: ограничиваем ширину контента */
+/* Общая обёртка — центрирование на компьютере */
+#app-wrapper {
+  width: 100%;
+  position: relative;
+  background-color: #000000;
+}
+
 @media screen and (min-width: 768px) {
   body {
     display: flex;
@@ -22,26 +28,18 @@ body {
     background-color: #000000;
   }
   
-  .screen {
+  #app-wrapper {
     width: 33.33%;
     min-width: 300px;
     max-width: 500px;
     margin: 0 auto;
     background-color: #000000;
   }
-  
-  .frame {
-    width: 33.33%;
-    min-width: 300px;
-    max-width: 500px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
-/* Рамки */
+/* Рамки — теперь относительно обёртки */
 .frame {
-  position: fixed;
+  position: absolute;
   left: 0;
   width: 100%;
   z-index: 1001;
@@ -58,9 +56,9 @@ body {
   height: auto;
 }
 
-/* Крестик — всегда в правом верхнем углу */
+/* Крестик — тоже относительно обёртки */
 #closeButton {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   width: 40px;
@@ -240,16 +238,4 @@ body {
   .bot-wrapper {
     padding: 20px 0;
   }
-}
-
-/* Скрываем рамки, когда активен экран бота */
-#bot-screen:not([style*="display: none"]) ~ .frame,
-#bot-screen:not([style*="display: none"]) ~ #closeButton {
-  display: none;
-}
-
-/* Альтернативный вариант — если рамки находятся вне .screen, скрываем их когда бот активен */
-body:has(#bot-screen[style*="display: flex"]) .frame,
-body:has(#bot-screen[style*="display: flex"]) #closeButton {
-  display: none;
 }
