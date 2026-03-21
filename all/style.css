@@ -24,7 +24,7 @@ body {
   body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     background-color: #000000;
   }
   
@@ -37,7 +37,7 @@ body {
   }
 }
 
-/* Рамки — теперь относительно обёртки */
+/* Рамки — абсолютно относительно обёртки */
 .frame {
   position: absolute;
   left: 0;
@@ -56,17 +56,32 @@ body {
   height: auto;
 }
 
-/* Крестик — тоже относительно обёртки */
+/* Крестик — фиксированный, но привязан к ширине контента */
 #closeButton {
-  position: absolute;
+  position: fixed;
   top: 0;
-  right: 0;
   width: 40px;
   height: 40px;
   cursor: pointer;
   z-index: 1002;
   display: none;
   pointer-events: auto;
+}
+
+/* На мобильных — прижат к правому краю экрана */
+@media screen and (max-width: 767px) {
+  #closeButton {
+    right: 0;
+  }
+}
+
+/* На компьютере — рассчитываем позицию относительно центрированного контента */
+@media screen and (min-width: 768px) {
+  #closeButton {
+    left: 50%;
+    transform: translateX(calc(16.66% - 20px));
+    right: auto;
+  }
 }
 
 /* Экраны */
