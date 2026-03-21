@@ -341,7 +341,7 @@ function handleBotClick() {
 function showMenu() {
   console.log('Показ меню');
   currentScreen = 'menu';
-  menuScreen.style.display = 'block';
+  menuScreen.style.display = 'flex';
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'none';
@@ -355,7 +355,7 @@ function showRules() {
   console.log('Показ правил');
   currentScreen = 'rules';
   menuScreen.style.display = 'none';
-  rulesScreen.style.display = 'block';
+  rulesScreen.style.display = 'flex';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
@@ -371,7 +371,7 @@ function showAbout() {
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'none';
-  aboutScreen.style.display = 'block';
+  aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
   loadImages(aboutContainer, 'about');
@@ -382,7 +382,7 @@ function showBot() {
   currentScreen = 'bot';
   menuScreen.style.display = 'none';
   rulesScreen.style.display = 'none';
-  botScreen.style.display = 'block';
+  botScreen.style.display = 'flex';
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
