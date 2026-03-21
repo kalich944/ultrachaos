@@ -3,6 +3,7 @@ const menuScreen = document.getElementById('menu-screen');
 const rulesScreen = document.getElementById('rules-screen');
 const botScreen = document.getElementById('bot-screen');
 const galleryScreen = document.getElementById('gallery-screen');
+const aboutScreen = document.getElementById('about-screen');
 const closeButton = document.getElementById('closeButton');
 const fullscreen = document.getElementById('fullscreen');
 const fullscreenImg = document.getElementById('fullscreen-img');
@@ -10,6 +11,7 @@ const fullscreenImg = document.getElementById('fullscreen-img');
 // Контейнеры
 const imageContainer = document.getElementById('imageContainer');
 const rulesContainer = document.getElementById('rulesContainer');
+const aboutContainer = document.getElementById('aboutContainer');
 
 // Элементы бота
 const botContainer = document.getElementById('botContainer');
@@ -44,14 +46,33 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ЗАГРУЗКИ ==========
-function loadImages(container, baseName, startNumber = 1, onClick = null) {
+// ========== МЕНЮ: случайное изображение из трёх ==========
+function loadRandomMenuImage() {
+  if (!imageContainer) return;
+  
+  imageContainer.innerHTML = '';
+  
+  const variants = ['all/menu (1a).png', 'all/menu (1b).png', 'all/menu (1c).png'];
+  const randomIndex = Math.floor(Math.random() * variants.length);
+  const selectedImage = variants[randomIndex];
+  
+  const img = document.createElement('img');
+  img.src = selectedImage;
+  img.alt = 'Меню Ультрахаос';
+  img.style.width = '100%';
+  img.style.height = 'auto';
+  img.style.display = 'block';
+  
+  imageContainer.appendChild(img);
+}
+
+// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ ==========
+function loadImages(container, baseName, startNumber = 1) {
   if (!container) {
     console.error('Контейнер не найден:', baseName);
     return;
   }
   
-  // Очищаем контейнер
   container.innerHTML = '';
   console.log(`Загрузка ${baseName}...`);
   
@@ -66,15 +87,6 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
-      
-      if (onClick) {
-        const handler = onClick(currentIndex);
-        if (handler) {
-          img.addEventListener('click', handler);
-          img.style.cursor = 'pointer';
-        }
-      }
-      
       container.appendChild(img);
       loadedCount++;
       i++;
@@ -83,8 +95,6 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
     
     img.onerror = function() {
       console.log(`Загружено ${loadedCount} изображений ${baseName}`);
-      
-      // Проверяем отложенную навигацию
       if (pendingHash) {
         handleDeepLink(pendingHash);
         pendingHash = null;
@@ -97,7 +107,7 @@ function loadImages(container, baseName, startNumber = 1, onClick = null) {
   loadNext();
 }
 
-// ========== ФУНКЦИИ ГАЛЕРЕИ ==========
+// ========== ГАЛЕРЕЯ ==========
 function checkImageExists(url) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -115,15 +125,15 @@ async function loadGallery() {
   
   console.log('Загрузка галереи...');
   
-  // Очищаем все галереи
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
   wGallery.innerHTML = '';
   
-  // Загружаем основную галерею (1.jpg, 2.jpg...)
+  const galleryPath = 'all/gallery/';
+  
   for (let i = 1; i <= 200; i++) {
-    const baseUrl = `gallery/${i}.jpg`;
+    const baseUrl = `${galleryPath}${i}.jpg`;
     if (await checkImageExists(baseUrl)) {
       const img = document.createElement('img');
       img.src = baseUrl;
@@ -131,8 +141,7 @@ async function loadGallery() {
       img.className = 'card-image';
       img.loading = 'lazy';
       
-      // Проверяем наличие детального изображения
-      const detailUrl = `gallery/d${i}.jpg`;
+      const detailUrl = `${galleryPath}d${i}.jpg`;
       if (await checkImageExists(detailUrl)) {
         img.style.cursor = 'pointer';
         img.addEventListener('click', () => {
@@ -144,9 +153,8 @@ async function loadGallery() {
       mainGallery.appendChild(img);
     }
     
-    // Загружаем варианты a, b, c
     for (let letter of ['a', 'b', 'c']) {
-      const variantUrl = `gallery/${i}${letter}.jpg`;
+      const variantUrl = `${galleryPath}${i}${letter}.jpg`;
       if (await checkImageExists(variantUrl)) {
         const img = document.createElement('img');
         img.src = variantUrl;
@@ -154,7 +162,7 @@ async function loadGallery() {
         img.className = 'card-image';
         img.loading = 'lazy';
         
-        const detailUrl = `gallery/d${i}${letter}.jpg`;
+        const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
         if (await checkImageExists(detailUrl)) {
           img.style.cursor = 'pointer';
           img.addEventListener('click', () => {
@@ -168,7 +176,6 @@ async function loadGallery() {
     }
   }
   
-  // Загружаем серии p, a, w
   const series = [
     { prefix: 'p', gallery: pGallery },
     { prefix: 'a', gallery: aGallery },
@@ -177,7 +184,7 @@ async function loadGallery() {
   
   for (let s of series) {
     for (let i = 1; i <= 100; i++) {
-      const url = `gallery/${s.prefix}${i}.jpg`;
+      const url = `${galleryPath}${s.prefix}${i}.jpg`;
       if (await checkImageExists(url)) {
         const img = document.createElement('img');
         img.src = url;
@@ -185,7 +192,7 @@ async function loadGallery() {
         img.className = 'card-image';
         img.loading = 'lazy';
         
-        const detailUrl = `gallery/d${s.prefix}${i}.jpg`;
+        const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
         if (await checkImageExists(detailUrl)) {
           img.style.cursor = 'pointer';
           img.addEventListener('click', () => {
@@ -226,12 +233,15 @@ function handleDeepLink(hash) {
   else if (target === 'bot') {
     showBot();
   }
+  else if (target === 'about') {
+    showAbout();
+  }
   else if (target === 'menu') {
     showMenu();
   }
 }
 
-// ========== ЗАГРУЗКА КРИСТАЛЛОВ ==========
+// ========== БОТ ==========
 function loadBotCrystals() {
   botCrystals = [];
   let i = 1;
@@ -239,10 +249,10 @@ function loadBotCrystals() {
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
-    img.src = `bot crys (${currentIndex}).JPG`;
+    const imgPath = `all/bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
-      botCrystals.push(`bot crys (${currentIndex}).JPG`);
+      botCrystals.push(imgPath);
       i++;
       loadNext();
     };
@@ -251,12 +261,13 @@ function loadBotCrystals() {
       console.log(`Загружено кристаллов: ${botCrystals.length}`);
       loadBotOptions();
     };
+    
+    img.src = imgPath;
   }
   
   loadNext();
 }
 
-// ========== ЗАГРУЗКА ОПЦИЙ ==========
 function loadBotOptions() {
   botOptions = [];
   let i = 1;
@@ -264,10 +275,10 @@ function loadBotOptions() {
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
-    img.src = `bot (${currentIndex}).jpg`;
+    const imgPath = `all/bot (${currentIndex}).jpg`;
     
     img.onload = function() {
-      botOptions.push(`bot (${currentIndex}).jpg`);
+      botOptions.push(imgPath);
       i++;
       loadNext();
     };
@@ -276,12 +287,13 @@ function loadBotOptions() {
       console.log(`Загружено опций: ${botOptions.length}`);
       showBotReady();
     };
+    
+    img.src = imgPath;
   }
   
   loadNext();
 }
 
-// ========== ФУНКЦИИ БОТА ==========
 function showBotReady() {
   if (botCrystals.length > 0) {
     botCrystal.src = botCrystals[0];
@@ -320,14 +332,10 @@ function showMenu() {
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'none';
+  aboutScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  loadImages(imageContainer, 'menu', 1, function(index) {
-    if (index === 3) return showRules;
-    if (index === 4) return showBot;
-    if (index === 5) return showGallery;
-    return null;
-  });
+  loadRandomMenuImage();
 }
 
 function showRules() {
@@ -337,9 +345,23 @@ function showRules() {
   rulesScreen.style.display = 'block';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'none';
+  aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  loadImages(rulesContainer, 'rules');
+  loadImages(rulesContainer, 'all/rules');
+}
+
+function showAbout() {
+  console.log('Показ "Об игре"');
+  currentScreen = 'about';
+  menuScreen.style.display = 'none';
+  rulesScreen.style.display = 'none';
+  botScreen.style.display = 'none';
+  galleryScreen.style.display = 'none';
+  aboutScreen.style.display = 'block';
+  closeButton.style.display = 'block';
+  
+  loadImages(aboutContainer, 'all/about');
 }
 
 function showBot() {
@@ -349,6 +371,7 @@ function showBot() {
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'block';
   galleryScreen.style.display = 'none';
+  aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
   botOpening.style.display = 'block';
@@ -365,6 +388,7 @@ function showGallery() {
   rulesScreen.style.display = 'none';
   botScreen.style.display = 'none';
   galleryScreen.style.display = 'block';
+  aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
   loadGallery();
@@ -388,5 +412,4 @@ if (startParam) {
   pendingHash = '#' + startParam;
 }
 
-// Запускаем меню
 showMenu();
