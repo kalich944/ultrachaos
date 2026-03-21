@@ -46,27 +46,13 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: первое случайное, остальные с кликами ==========
-function loadRandomMenuImage() {
+// ========== МЕНЮ: загружаем menu (1)...(8) с кликами ==========
+function loadMenuImages() {
   if (!imageContainer) return;
   
   imageContainer.innerHTML = '';
   
-  // Случайный выбор для первого изображения
-  const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
-  const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
-  
-  // Загружаем первое (случайное)
-  const firstImg = document.createElement('img');
-  firstImg.src = randomFirst;
-  firstImg.alt = 'Меню 1';
-  firstImg.style.width = '100%';
-  firstImg.style.height = 'auto';
-  firstImg.style.display = 'block';
-  imageContainer.appendChild(firstImg);
-  
-  // Загружаем остальные (2,3,4,5,6,7,8) с обработчиками кликов
-  for (let i = 2; i <= 8; i++) {
+  for (let i = 1; i <= 8; i++) {
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
@@ -362,7 +348,7 @@ function showMenu() {
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'none';
   
-  loadRandomMenuImage();
+  loadMenuImages();
 }
 
 function showRules() {
