@@ -64,6 +64,11 @@ function loadMenuImages() {
     if (i === 3) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showBot());
+    } else if (i === 4) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => {
+        window.open('https://www.avito.ru/brands/63979153b8bf07d6eb232ea8836f16b9/all/sport_i_otdyh?gdlkerfdnwq=101&page_from=from_item_card&iid=7826045800&sellerId=de3d7e1794b05276f5e69732a9ebbd1c', '_blank');
+      });
     } else if (i === 5) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showRules());
