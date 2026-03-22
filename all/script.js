@@ -33,7 +33,10 @@ let botOptions = [];
 let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
-let showCrystalOnNextClick = false; // флаг для опции 23
+
+// Флаги для особого режима опции 23
+let specialModeActive = false;
+let waitingForSecondClick = false;
 
 // ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
 function getTelegramStartParam() {
@@ -333,50 +336,79 @@ function showBotReady() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   botFirstClick = true;
-  showCrystalOnNextClick = false;
+  specialModeActive = false;
+  waitingForSecondClick = false;
 }
 
 function handleBotClick() {
-  // Если первый клик (заставка)
+  // Первый клик (убираем заставку)
   if (botFirstClick) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
     
-    // Проверяем текущую опцию (первая загруженная)
+    // Проверяем, не является ли первая опция 23
     const currentOption = botOption.src;
     if (currentOption.includes('bot (23).jpg')) {
-      botCrystal.style.display = 'none';
-      showCrystalOnNextClick = true; // следующий клик покажет кристалл
+      // Устанавливаем специальный режим
+      specialModeActive = true;
+      waitingForSecondClick = false;
+      // Принудительно ставим кристалл 9
+      const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
+      botCrystal.src = crystal9;
     } else {
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
+      specialModeActive = false;
+      waitingForSecondClick = false;
     }
     return;
   }
   
-  // Если нужно показать кристалл (была опция 23 и клик для показа)
-  if (showCrystalOnNextClick) {
-    botCrystal.style.display = 'block';
-    showCrystalOnNextClick = false;
-    return; // не меняем опцию
+  // Если активен специальный режим
+  if (specialModeActive) {
+    if (!waitingForSecondClick) {
+      // Первый шаг: меняем кристалл на случайный (но опцию не трогаем)
+      const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
+      botCrystal.src = randomCrystal;
+      waitingForSecondClick = true;
+    } else {
+      // Второй шаг: выходим из режима, меняем и опцию, и кристалл как обычно
+      const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
+      const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
+      botCrystal.src = randomCrystal;
+      botOption.src = randomOption;
+      
+      specialModeActive = false;
+      waitingForSecondClick = false;
+      
+      // Если новая опция снова 23, то активируем режим заново
+      if (randomOption.includes('bot (23).jpg')) {
+        specialModeActive = true;
+        waitingForSecondClick = false;
+        const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
+        botCrystal.src = crystal9;
+      }
+    }
+    return;
   }
   
-  // Обычный клик: меняем и кристалл, и опцию
+  // Обычный режим
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
     botCrystal.src = randomCrystal;
     botOption.src = randomOption;
     
-    // Проверяем, является ли новая опция 23
+    // Если выпала опция 23, активируем специальный режим
     if (randomOption.includes('bot (23).jpg')) {
-      botCrystal.style.display = 'none';
-      showCrystalOnNextClick = true; // следующий клик покажет кристалл
+      specialModeActive = true;
+      waitingForSecondClick = false;
+      // Принудительно ставим кристалл 9
+      const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
+      botCrystal.src = crystal9;
     } else {
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
+      specialModeActive = false;
+      waitingForSecondClick = false;
     }
   }
 }
@@ -434,6 +466,10 @@ function showBot() {
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
+  
+  // Сбрасываем флаги при входе в бота
+  specialModeActive = false;
+  waitingForSecondClick = false;
   
   loadBotCrystals();
 }
