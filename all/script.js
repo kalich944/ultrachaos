@@ -319,7 +319,10 @@ function loadBotCrystals() {
     const imgPath = `bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
-      botCrystals.push(imgPath);
+      // Исключаем кристалл номер 9 из общего массива
+      if (currentIndex !== 9) {
+        botCrystals.push(imgPath);
+      }
       i++;
       loadNext();
     };
@@ -387,7 +390,7 @@ function handleBotClick() {
     // Проверяем текущую опцию (первая загруженная)
     const currentOption = botOption.src;
     if (currentOption.includes('bot (21).jpg')) {
-      // Принудительно ставим bot crys (9).JPG
+      // Принудительно ставим bot crys (9).JPG (он не в общем массиве)
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true; // следующий клик сменит кристалл случайно
@@ -400,7 +403,7 @@ function handleBotClick() {
   
   // Если опция 21 и ещё не меняли кристалл (первый клик после появления 21)
   if (showCrystalOnNextClick) {
-    // Меняем кристалл на случайный, оставляя опцию
+    // Меняем кристалл на случайный из общего массива (без 9), оставляя опцию
     if (botCrystals.length > 0) {
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
       botCrystal.src = randomCrystal;
