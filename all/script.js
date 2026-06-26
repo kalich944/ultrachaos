@@ -58,14 +58,43 @@ function loadMenuImages() {
   const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
   
   for (let i = 1; i <= 7; i++) {
-    const img = document.createElement('img');
-    let imgSrc;
     if (i === 1) {
-      imgSrc = randomFirst;
-    } else {
-      imgSrc = `menu (${i}).png`;
+      // Создаём обёртку для первого изображения и кнопки "about"
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.width = '100%';
+      wrapper.style.display = 'block';
+      
+      // Основное изображение
+      const img = document.createElement('img');
+      img.src = randomFirst;
+      img.alt = `Меню 1`;
+      img.style.width = '100%';
+      img.style.height = 'auto';
+      img.style.display = 'block';
+      wrapper.appendChild(img);
+      
+      // Кнопка "about" (menu about.png)
+      const aboutImg = document.createElement('img');
+      aboutImg.src = 'menu about.png';
+      aboutImg.alt = 'О игре';
+      aboutImg.style.position = 'absolute';
+      aboutImg.style.top = '5%';      // отступ сверху
+      aboutImg.style.right = '5%';    // отступ справа
+      aboutImg.style.width = '25%';   // четверть ширины
+      aboutImg.style.height = 'auto';
+      aboutImg.style.pointerEvents = 'none'; // чтобы клики проходили сквозь
+      wrapper.appendChild(aboutImg);
+      
+      imageContainer.appendChild(wrapper);
+      
+      // Для i===1 обработчик не нужен (не кликабельно)
+      continue;
     }
-    img.src = imgSrc;
+    
+    // Остальные изображения (2..7)
+    const img = document.createElement('img');
+    img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
     img.style.width = '100%';
     img.style.height = 'auto';
@@ -87,7 +116,7 @@ function loadMenuImages() {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showGallery());
     }
-    // Для i === 7 и i === 1,2 — без клика
+    // Для i === 7 — без клика
     
     imageContainer.appendChild(img);
   }
