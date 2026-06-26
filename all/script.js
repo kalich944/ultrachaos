@@ -47,16 +47,25 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: загружаем menu (1)...(7) с кликами ==========
+// ========== МЕНЮ: загружаем menu (1)...(7) с кликами, первое случайное ==========
 function loadMenuImages() {
   if (!imageContainer) return;
   
   imageContainer.innerHTML = '';
   
-  // Загружаем изображения с 1 по 7 (8 не загружаем)
+  // Для первого изображения выбираем случайный вариант из трёх
+  const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
+  const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
+  
   for (let i = 1; i <= 7; i++) {
     const img = document.createElement('img');
-    img.src = `menu (${i}).png`;
+    let imgSrc;
+    if (i === 1) {
+      imgSrc = randomFirst;
+    } else {
+      imgSrc = `menu (${i}).png`;
+    }
+    img.src = imgSrc;
     img.alt = `Меню ${i}`;
     img.style.width = '100%';
     img.style.height = 'auto';
@@ -78,7 +87,7 @@ function loadMenuImages() {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showGallery());
     }
-    // Для i === 7 ничего не добавляем – просто картинка без клика
+    // Для i === 7 и i === 1,2 — без клика
     
     imageContainer.appendChild(img);
   }
