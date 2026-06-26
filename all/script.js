@@ -47,14 +47,14 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: загружаем menu (1)...(6) с кликами ==========
+// ========== МЕНЮ: загружаем menu (1)...(7) с кликами ==========
 function loadMenuImages() {
   if (!imageContainer) return;
   
   imageContainer.innerHTML = '';
   
-  // Теперь только 6 изображений (1-6)
-  for (let i = 1; i <= 6; i++) {
+  // Загружаем изображения с 1 по 7 (8 не загружаем)
+  for (let i = 1; i <= 7; i++) {
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
@@ -62,7 +62,7 @@ function loadMenuImages() {
     img.style.height = 'auto';
     img.style.display = 'block';
     
-    // Назначаем обработчики кликов по номерам
+    // Назначаем обработчики кликов по номерам (кроме 7)
     if (i === 3) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showBot());
@@ -78,7 +78,7 @@ function loadMenuImages() {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showGallery());
     }
-    // menu (1), (2) — без действия, menu (7) и (8) не загружаются
+    // Для i === 7 ничего не добавляем – просто картинка без клика
     
     imageContainer.appendChild(img);
   }
