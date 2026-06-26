@@ -125,8 +125,8 @@ function loadMenuImages() {
   }
 }
 
-// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ ==========
-function loadImages(container, baseName, startNumber = 1) {
+// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ С ПОДДЕРЖКОЙ КЛИКОВ ==========
+function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   if (!container) {
     console.error('Контейнер не найден:', baseName);
     return;
@@ -146,6 +146,13 @@ function loadImages(container, baseName, startNumber = 1) {
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
+      
+      // Если для этого индекса есть обработчик в clickMap
+      if (clickMap && clickMap[currentIndex]) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', clickMap[currentIndex]);
+      }
+      
       container.appendChild(img);
       loadedCount++;
       i++;
@@ -472,7 +479,16 @@ function showAbout() {
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
-  loadImages(aboutContainer, 'about');
+  // Определяем клики для about (9) -> бот, (10) -> правила, (11) -> Avito
+  const aboutClickMap = {
+    9: () => showBot(),
+    10: () => showRules(),
+    11: () => {
+      window.open('https://www.avito.ru/brands/63979153b8bf07d6eb232ea8836f16b9/all/sport_i_otdyh?gdlkerfdnwq=101&page_from=from_item_card&iid=7826045800&sellerId=de3d7e1794b05276f5e69732a9ebbd1c', '_blank');
+    }
+  };
+  
+  loadImages(aboutContainer, 'about', 1, aboutClickMap);
 }
 
 function showBot() {
