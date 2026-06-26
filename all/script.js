@@ -33,7 +33,7 @@ let botOptions = [];
 let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
-let showCrystalOnNextClick = false; // флаг для опции 21
+let showCrystalOnNextClick = false; // флаг для опции 4
 
 // ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
 function getTelegramStartParam() {
@@ -389,7 +389,7 @@ function handleBotClick() {
     
     // Проверяем текущую опцию (первая загруженная)
     const currentOption = botOption.src;
-    if (currentOption.includes('bot (21).jpg')) {
+    if (currentOption.includes('bot (4).jpg')) {
       // Принудительно ставим bot crys (9).JPG (он не в общем массиве)
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
@@ -401,7 +401,7 @@ function handleBotClick() {
     return;
   }
   
-  // Если опция 21 и ещё не меняли кристалл (первый клик после появления 21)
+  // Если опция 4 и ещё не меняли кристалл (первый клик после появления 4)
   if (showCrystalOnNextClick) {
     // Меняем кристалл на случайный из общего массива (без 9), оставляя опцию
     if (botCrystals.length > 0) {
@@ -421,8 +421,8 @@ function handleBotClick() {
     botOption.src = randomOption;
     botCrystal.style.display = 'block';
     
-    // Проверяем, является ли новая опция 21
-    if (randomOption.includes('bot (21).jpg')) {
+    // Проверяем, является ли новая опция 4
+    if (randomOption.includes('bot (4).jpg')) {
       // Если да, ставим bot crys (9).JPG и ставим флаг для следующего клика
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
