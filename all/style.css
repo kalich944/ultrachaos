@@ -13,7 +13,7 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Общая обёртка */
+/* Общая обёртка для центрирования */
 #app-wrapper {
   width: 100%;
   position: relative;
@@ -37,14 +37,24 @@ body {
   }
 }
 
-/* Рамки — фиксированные на весь экран, поверх всего */
+/* Рамки — фиксированные, центрированные, с шириной как у контента */
 #frameTop,
 #frameDown {
   position: fixed;
-  left: 0;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1001;
   pointer-events: none;
+  width: 100%; /* по умолчанию на мобильных */
+}
+
+@media screen and (min-width: 768px) {
+  #frameTop,
+  #frameDown {
+    width: 33.33%;
+    min-width: 300px;
+    max-width: 500px;
+  }
 }
 
 #frameTop {
@@ -57,7 +67,7 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный, по умолчанию прижат к правому верхнему углу окна с отступами */
+/* Крестик — фиксированный, привязан к рабочей области */
 #closeButton {
   position: fixed;
   top: 15px;
@@ -70,7 +80,6 @@ body {
   pointer-events: auto;
 }
 
-/* На компьютере — привязываем к правому верхнему углу рабочей области (центрированного контента) */
 @media screen and (min-width: 768px) {
   #closeButton {
     right: auto;
