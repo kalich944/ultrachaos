@@ -74,7 +74,7 @@ function loadMenuImages() {
       img.style.display = 'block';
       wrapper.appendChild(img);
       
-      // Кнопка "about" (menu about.png)
+      // Кнопка "about" (menu about.png) — кликабельная
       const aboutImg = document.createElement('img');
       aboutImg.src = 'menu about.png';
       aboutImg.alt = 'О игре';
@@ -83,12 +83,14 @@ function loadMenuImages() {
       aboutImg.style.right = '5%';    // отступ справа
       aboutImg.style.width = '25%';   // четверть ширины
       aboutImg.style.height = 'auto';
-      aboutImg.style.pointerEvents = 'none'; // чтобы клики проходили сквозь
+      aboutImg.style.cursor = 'pointer';
+      aboutImg.addEventListener('click', (e) => {
+        e.stopPropagation(); // предотвращаем всплытие, если вдруг
+        showAbout();
+      });
       wrapper.appendChild(aboutImg);
       
       imageContainer.appendChild(wrapper);
-      
-      // Для i===1 обработчик не нужен (не кликабельно)
       continue;
     }
     
