@@ -74,7 +74,7 @@ function loadMenuImages() {
       img.style.display = 'block';
       wrapper.appendChild(img);
       
-      // Кнопка "about" (menu about.png) — кликабельная
+      // Кнопка "about" (menu about.png) — кликабельная, с анимацией
       const aboutImg = document.createElement('img');
       aboutImg.src = 'menu about.png';
       aboutImg.alt = 'О игре';
@@ -84,8 +84,9 @@ function loadMenuImages() {
       aboutImg.style.width = '25%';   // четверть ширины
       aboutImg.style.height = 'auto';
       aboutImg.style.cursor = 'pointer';
+      aboutImg.classList.add('floating'); // добавляем класс для анимации
       aboutImg.addEventListener('click', (e) => {
-        e.stopPropagation(); // предотвращаем всплытие, если вдруг
+        e.stopPropagation();
         showAbout();
       });
       wrapper.appendChild(aboutImg);
