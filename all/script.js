@@ -33,7 +33,7 @@ let botOptions = [];
 let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
-let showCrystalOnNextClick = false; // флаг для опции 23
+let showCrystalOnNextClick = false; // флаг для опции 21
 
 // ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
 function getTelegramStartParam() {
@@ -79,12 +79,12 @@ function loadMenuImages() {
       aboutImg.src = 'menu about.png';
       aboutImg.alt = 'О игре';
       aboutImg.style.position = 'absolute';
-      aboutImg.style.top = '5%';      // отступ сверху
-      aboutImg.style.right = '5%';    // отступ справа
-      aboutImg.style.width = '25%';   // четверть ширины
+      aboutImg.style.top = '5%';
+      aboutImg.style.right = '5%';
+      aboutImg.style.width = '25%';
       aboutImg.style.height = 'auto';
       aboutImg.style.cursor = 'pointer';
-      aboutImg.classList.add('floating'); // добавляем класс для анимации
+      aboutImg.classList.add('floating');
       aboutImg.addEventListener('click', (e) => {
         e.stopPropagation();
         showAbout();
@@ -386,7 +386,7 @@ function handleBotClick() {
     
     // Проверяем текущую опцию (первая загруженная)
     const currentOption = botOption.src;
-    if (currentOption.includes('bot (23).jpg')) {
+    if (currentOption.includes('bot (21).jpg')) {
       // Принудительно ставим bot crys (9).JPG
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
@@ -398,7 +398,7 @@ function handleBotClick() {
     return;
   }
   
-  // Если опция 23 и ещё не меняли кристалл (первый клик после появления 23)
+  // Если опция 21 и ещё не меняли кристалл (первый клик после появления 21)
   if (showCrystalOnNextClick) {
     // Меняем кристалл на случайный, оставляя опцию
     if (botCrystals.length > 0) {
@@ -418,8 +418,8 @@ function handleBotClick() {
     botOption.src = randomOption;
     botCrystal.style.display = 'block';
     
-    // Проверяем, является ли новая опция 23
-    if (randomOption.includes('bot (23).jpg')) {
+    // Проверяем, является ли новая опция 21
+    if (randomOption.includes('bot (21).jpg')) {
       // Если да, ставим bot crys (9).JPG и ставим флаг для следующего клика
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
