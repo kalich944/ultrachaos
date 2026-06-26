@@ -35,6 +35,16 @@ let botFirstClick = true;
 let pendingHash = null;
 let showCrystalOnNextClick = false; // флаг для опции 4
 
+// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
+function fileExists(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
 // ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
 function getTelegramStartParam() {
   try {
@@ -147,7 +157,6 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
       
-      // Если для этого индекса есть обработчик в clickMap
       if (clickMap && clickMap[currentIndex]) {
         img.style.cursor = 'pointer';
         img.addEventListener('click', clickMap[currentIndex]);
@@ -232,62 +241,53 @@ function loadGallery() {
   
   const galleryPath = 'gallery/';
   
-  // Функция проверки существования файла (параллельная)
-  function checkFileExists(url, callback) {
-    const img = new Image();
-    img.onload = () => callback(true);
-    img.onerror = () => callback(false);
-    img.src = url;
-  }
-  
-  // Загружаем основную галерею (1.jpg, 1a.jpg, 1b.jpg, 1c.jpg)
-  for (let i = 1; i <= 200; i++) {
-    const baseUrl = `${galleryPath}${i}.jpg`;
-    checkFileExists(baseUrl, (exists) => {
-      if (exists) {
+  // Используем общую функцию fileExists
+  async function loadImagesAsync() {
+    for (let i = 1; i <= 200; i++) {
+      const baseUrl = `${galleryPath}${i}.jpg`;
+      if (await fileExists(baseUrl)) {
         const detailUrl = `${galleryPath}d${i}.jpg`;
-        checkFileExists(detailUrl, (hasDetail) => {
-          addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
-        });
+        const hasDetail = await fileExists(detailUrl);
+        addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
       }
-    });
-    
-    // Варианты a, b, c
-    for (let letter of ['a', 'b', 'c']) {
-      const variantUrl = `${galleryPath}${i}${letter}.jpg`;
-      checkFileExists(variantUrl, (exists) => {
-        if (exists) {
+      
+      for (let letter of ['a', 'b', 'c']) {
+        const variantUrl = `${galleryPath}${i}${letter}.jpg`;
+        if (await fileExists(variantUrl)) {
           const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
-          checkFileExists(detailUrl, (hasDetail) => {
-            addCardWithCorner(mainGallery, variantUrl, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
-          });
+          const hasDetail = await fileExists(detailUrl);
+          addCardWithCorner(mainGallery, variantUrl, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
         }
-      });
+      }
     }
-  }
-  
-  // Загружаем серии p, a, w
-  const series = [
-    { prefix: 'p', gallery: pGallery },
-    { prefix: 'a', gallery: aGallery },
-    { prefix: 'w', gallery: wGallery }
-  ];
-  
-  for (let s of series) {
-    for (let i = 1; i <= 100; i++) {
-      const url = `${galleryPath}${s.prefix}${i}.jpg`;
-      checkFileExists(url, (exists) => {
-        if (exists) {
+    
+    const series = [
+      { prefix: 'p', gallery: pGallery },
+      { prefix: 'a', gallery: aGallery },
+      { prefix: 'w', gallery: wGallery }
+    ];
+    
+    for (let s of series) {
+      for (let i = 1; i <= 100; i++) {
+        const url = `${galleryPath}${s.prefix}${i}.jpg`;
+        if (await fileExists(url)) {
           const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
-          checkFileExists(detailUrl, (hasDetail) => {
-            addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
-          });
+          const hasDetail = await fileExists(detailUrl);
+          addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
+        } else {
+          break;
         }
-      });
+      }
+    }
+    
+    console.log('Галерея загружена');
+    if (pendingHash && pendingHash.startsWith('#gallery-')) {
+      handleDeepLink(pendingHash);
+      pendingHash = null;
     }
   }
   
-  console.log('Галерея начала загрузку');
+  loadImagesAsync();
 }
 
 // ========== ГЛУБОКИЕ ССЫЛКИ ==========
@@ -326,7 +326,6 @@ function loadBotCrystals() {
     const imgPath = `bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
-      // Исключаем кристалл номер 9 из общего массива
       if (currentIndex !== 9) {
         botCrystals.push(imgPath);
       }
@@ -387,20 +386,17 @@ function showBotReady() {
 }
 
 function handleBotClick() {
-  // Если первый клик (заставка)
   if (botFirstClick) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
     
-    // Проверяем текущую опцию (первая загруженная)
     const currentOption = botOption.src;
     if (currentOption.includes('bot (4).jpg')) {
-      // Принудительно ставим bot crys (9).JPG (он не в общем массиве)
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
-      showCrystalOnNextClick = true; // следующий клик сменит кристалл случайно
+      showCrystalOnNextClick = true;
     } else {
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = false;
@@ -408,19 +404,16 @@ function handleBotClick() {
     return;
   }
   
-  // Если опция 4 и ещё не меняли кристалл (первый клик после появления 4)
   if (showCrystalOnNextClick) {
-    // Меняем кристалл на случайный из общего массива (без 9), оставляя опцию
     if (botCrystals.length > 0) {
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
       botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false; // сбрасываем, чтобы следующий клик был обычным
+      showCrystalOnNextClick = false;
     }
     return;
   }
   
-  // Обычный клик: меняем и кристалл, и опцию случайно
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
@@ -428,14 +421,11 @@ function handleBotClick() {
     botOption.src = randomOption;
     botCrystal.style.display = 'block';
     
-    // Проверяем, является ли новая опция 4
     if (randomOption.includes('bot (4).jpg')) {
-      // Если да, ставим bot crys (9).JPG и ставим флаг для следующего клика
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true;
     } else {
-      // Иначе показываем случайный кристалл и сбрасываем флаг
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = false;
     }
@@ -456,7 +446,7 @@ function showMenu() {
   loadMenuImages();
 }
 
-function showRules() {
+async function showRules() {
   console.log('Показ правил');
   currentScreen = 'rules';
   menuScreen.style.display = 'none';
@@ -466,7 +456,105 @@ function showRules() {
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  loadImages(rulesContainer, 'rules');
+  rulesContainer.innerHTML = '';
+  
+  let i = 1;
+  let hasAny = true;
+  
+  while (hasAny) {
+    const plainFile = `rules (${i}).png`;
+    const fileA = `rules (${i}a).png`;
+    const fileB = `rules (${i}b).png`;
+    
+    const existsPlain = await fileExists(plainFile);
+    const existsA = await fileExists(fileA);
+    const existsB = await fileExists(fileB);
+    
+    // Если нет ни одного файла для этого номера — прекращаем
+    if (!existsPlain && !existsA && !existsB) {
+      hasAny = false;
+      break;
+    }
+    
+    // Если есть и A, и B — делаем переключалку
+    if (existsA && existsB) {
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.width = '100%';
+      
+      const imgA = document.createElement('img');
+      imgA.src = fileA;
+      imgA.alt = `Правило ${i}a`;
+      imgA.style.width = '100%';
+      imgA.style.height = 'auto';
+      imgA.style.display = 'block';
+      imgA.style.cursor = 'pointer';
+      
+      const imgB = document.createElement('img');
+      imgB.src = fileB;
+      imgB.alt = `Правило ${i}b`;
+      imgB.style.width = '100%';
+      imgB.style.height = 'auto';
+      imgB.style.display = 'none';
+      imgB.style.cursor = 'pointer';
+      
+      let showA = true;
+      const toggle = function() {
+        if (showA) {
+          imgA.style.display = 'none';
+          imgB.style.display = 'block';
+        } else {
+          imgA.style.display = 'block';
+          imgB.style.display = 'none';
+        }
+        showA = !showA;
+      };
+      
+      imgA.addEventListener('click', toggle);
+      imgB.addEventListener('click', toggle);
+      
+      wrapper.appendChild(imgA);
+      wrapper.appendChild(imgB);
+      rulesContainer.appendChild(wrapper);
+    }
+    // Иначе если есть обычный файл — показываем его
+    else if (existsPlain) {
+      const img = document.createElement('img');
+      img.src = plainFile;
+      img.alt = `Правило ${i}`;
+      img.style.width = '100%';
+      img.style.height = 'auto';
+      img.style.display = 'block';
+      rulesContainer.appendChild(img);
+    }
+    // Если есть только A (без B) — показываем A как статичное
+    else if (existsA) {
+      const img = document.createElement('img');
+      img.src = fileA;
+      img.alt = `Правило ${i}a`;
+      img.style.width = '100%';
+      img.style.height = 'auto';
+      img.style.display = 'block';
+      rulesContainer.appendChild(img);
+    }
+    // Если есть только B (без A) — показываем B как статичное
+    else if (existsB) {
+      const img = document.createElement('img');
+      img.src = fileB;
+      img.alt = `Правило ${i}b`;
+      img.style.width = '100%';
+      img.style.height = 'auto';
+      img.style.display = 'block';
+      rulesContainer.appendChild(img);
+    }
+    
+    i++;
+  }
+  
+  if (pendingHash && pendingHash.startsWith('#rules-')) {
+    handleDeepLink(pendingHash);
+    pendingHash = null;
+  }
 }
 
 function showAbout() {
@@ -479,7 +567,6 @@ function showAbout() {
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
-  // Определяем клики для about (9) -> бот, (10) -> правила, (11) -> Avito
   const aboutClickMap = {
     9: () => showBot(),
     10: () => showRules(),
