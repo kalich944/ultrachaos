@@ -37,9 +37,10 @@ body {
   }
 }
 
-/* Рамки — всегда видны, позиционированы относительно обёртки */
-.frame {
-  position: absolute;
+/* Рамки — фиксированные на весь экран, поверх всего */
+#frameTop,
+#frameDown {
+  position: fixed;
   left: 0;
   width: 100%;
   z-index: 1001;
@@ -56,7 +57,7 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный */
+/* Крестик — фиксированный, поверх рамок */
 #closeButton {
   position: fixed;
   top: 0;
@@ -255,13 +256,13 @@ body {
   }
 }
 
-/* ===== Плавающая кнопка "Об игре" (уменьшенная амплитуда) ===== */
+/* ===== Плавающая кнопка "Об игре" ===== */
 .floating {
   animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }  /* подъём уменьшен вдвое */
+  50% { transform: translateY(-5px); }
   100% { transform: translateY(0px); }
 }
