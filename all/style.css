@@ -57,7 +57,7 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный, в правом верхнем углу с отступами */
+/* Крестик — фиксированный, по умолчанию прижат к правому верхнему углу окна с отступами */
 #closeButton {
   position: fixed;
   top: 15px;
@@ -68,6 +68,16 @@ body {
   z-index: 1002;
   display: none;
   pointer-events: auto;
+}
+
+/* На компьютере — привязываем к правому верхнему углу рабочей области (центрированного контента) */
+@media screen and (min-width: 768px) {
+  #closeButton {
+    right: auto;
+    left: 50%;
+    transform: translateX(calc(16.66% - 55px));
+    top: 15px;
+  }
 }
 
 /* Экраны */
