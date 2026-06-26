@@ -33,10 +33,7 @@ let botOptions = [];
 let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
-
-// Флаги для особого режима опции 23
-let specialModeActive = false;
-let waitingForSecondClick = false;
+let showCrystalOnNextClick = false; // флаг для опции 23
 
 // ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
 function getTelegramStartParam() {
@@ -50,13 +47,14 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: загружаем menu (1)...(8) с кликами ==========
+// ========== МЕНЮ: загружаем menu (1)...(6) с кликами ==========
 function loadMenuImages() {
   if (!imageContainer) return;
   
   imageContainer.innerHTML = '';
   
-  for (let i = 1; i <= 8; i++) {
+  // Теперь только 6 изображений (1-6)
+  for (let i = 1; i <= 6; i++) {
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
@@ -79,10 +77,8 @@ function loadMenuImages() {
     } else if (i === 6) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showGallery());
-    } else if (i === 7) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => showAbout());
     }
+    // menu (1), (2) — без действия, menu (7) и (8) не загружаются
     
     imageContainer.appendChild(img);
   }
@@ -336,79 +332,61 @@ function showBotReady() {
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   botFirstClick = true;
-  specialModeActive = false;
-  waitingForSecondClick = false;
+  showCrystalOnNextClick = false;
 }
 
 function handleBotClick() {
-  // Первый клик (убираем заставку)
+  // Если первый клик (заставка)
   if (botFirstClick) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
     
-    // Проверяем, не является ли первая опция 23
+    // Проверяем текущую опцию (первая загруженная)
     const currentOption = botOption.src;
     if (currentOption.includes('bot (23).jpg')) {
-      // Устанавливаем специальный режим
-      specialModeActive = true;
-      waitingForSecondClick = false;
-      // Принудительно ставим кристалл 9
-      const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
-      botCrystal.src = crystal9;
+      // Принудительно ставим bot crys (9).JPG
+      botCrystal.src = 'bot crys (9).JPG';
+      botCrystal.style.display = 'block';
+      showCrystalOnNextClick = true; // следующий клик сменит кристалл случайно
     } else {
-      specialModeActive = false;
-      waitingForSecondClick = false;
+      botCrystal.style.display = 'block';
+      showCrystalOnNextClick = false;
     }
     return;
   }
   
-  // Если активен специальный режим
-  if (specialModeActive) {
-    if (!waitingForSecondClick) {
-      // Первый шаг: меняем кристалл на случайный (но опцию не трогаем)
+  // Если опция 23 и ещё не меняли кристалл (первый клик после появления 23)
+  if (showCrystalOnNextClick) {
+    // Меняем кристалл на случайный, оставляя опцию
+    if (botCrystals.length > 0) {
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
       botCrystal.src = randomCrystal;
-      waitingForSecondClick = true;
-    } else {
-      // Второй шаг: выходим из режима, меняем и опцию, и кристалл как обычно
-      const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
-      const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
-      botCrystal.src = randomCrystal;
-      botOption.src = randomOption;
-      
-      specialModeActive = false;
-      waitingForSecondClick = false;
-      
-      // Если новая опция снова 23, то активируем режим заново
-      if (randomOption.includes('bot (23).jpg')) {
-        specialModeActive = true;
-        waitingForSecondClick = false;
-        const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
-        botCrystal.src = crystal9;
-      }
+      botCrystal.style.display = 'block';
+      showCrystalOnNextClick = false; // сбрасываем, чтобы следующий клик был обычным
     }
     return;
   }
   
-  // Обычный режим
+  // Обычный клик: меняем и кристалл, и опцию случайно
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
     botCrystal.src = randomCrystal;
     botOption.src = randomOption;
+    botCrystal.style.display = 'block';
     
-    // Если выпала опция 23, активируем специальный режим
+    // Проверяем, является ли новая опция 23
     if (randomOption.includes('bot (23).jpg')) {
-      specialModeActive = true;
-      waitingForSecondClick = false;
-      // Принудительно ставим кристалл 9
-      const crystal9 = botCrystals.find(c => c.includes('bot crys (9).JPG')) || 'bot crys (9).JPG';
-      botCrystal.src = crystal9;
+      // Если да, ставим bot crys (9).JPG и ставим флаг для следующего клика
+      botCrystal.src = 'bot crys (9).JPG';
+      botCrystal.style.display = 'block';
+      showCrystalOnNextClick = true;
     } else {
-      specialModeActive = false;
-      waitingForSecondClick = false;
+      // Иначе показываем случайный кристалл и сбрасываем флаг
+      botCrystal.style.display = 'block';
+      showCrystalOnNextClick = false;
     }
   }
 }
@@ -466,10 +444,6 @@ function showBot() {
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
-  
-  // Сбрасываем флаги при входе в бота
-  specialModeActive = false;
-  waitingForSecondClick = false;
   
   loadBotCrystals();
 }
