@@ -57,7 +57,7 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: загружаем menu (1)...(7) с кликами, первое случайное ==========
+// ========== МЕНЮ: загружаем menu (1)...(8) с кликами, первое случайное ==========
 function loadMenuImages() {
   if (!imageContainer) return;
   
@@ -67,7 +67,7 @@ function loadMenuImages() {
   const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
   const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
   
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 8; i++) {
     if (i === 1) {
       // Создаём обёртку для первого изображения и кнопки "about"
       const wrapper = document.createElement('div');
@@ -105,7 +105,7 @@ function loadMenuImages() {
       continue;
     }
     
-    // Остальные изображения (2..7)
+    // Остальные изображения (2..8)
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
@@ -113,7 +113,7 @@ function loadMenuImages() {
     img.style.height = 'auto';
     img.style.display = 'block';
     
-    // Назначаем обработчики кликов по номерам (кроме 7)
+    // Назначаем обработчики кликов по номерам
     if (i === 3) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showBot());
@@ -128,8 +128,13 @@ function loadMenuImages() {
     } else if (i === 6) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showGallery());
+    } else if (i === 7) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => {
+        window.open('https://t.me/ultrachaosAKB', '_blank');
+      });
     }
-    // Для i === 7 — без клика
+    // Для i === 8 — без клика
     
     imageContainer.appendChild(img);
   }
@@ -256,17 +261,15 @@ async function loadGallery() {
       ]);
       
       if (!hasBase && !hasA && !hasB && !hasC) {
-        continue; // если нет ни одного файла для этого номера, пропускаем
+        continue;
       }
       
-      // Добавляем base
       if (hasBase) {
         const detailUrl = `${galleryPath}d${i}.jpg`;
         const hasDetail = await fileExists(detailUrl);
         addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
       }
       
-      // Добавляем a, b, c
       for (let [url, letter] of [[aUrl, 'a'], [bUrl, 'b'], [cUrl, 'c']]) {
         if (await fileExists(url)) {
           const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
@@ -287,7 +290,7 @@ async function loadGallery() {
       for (let i = 1; i <= s.max; i++) {
         const url = `${galleryPath}${s.prefix}${i}.jpg`;
         const exists = await fileExists(url);
-        if (!exists) break; // если файл не найден, дальше этой серии нет
+        if (!exists) break;
         const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
         const hasDetail = await fileExists(detailUrl);
         addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
@@ -485,13 +488,11 @@ async function showRules() {
     const existsA = await fileExists(fileA);
     const existsB = await fileExists(fileB);
     
-    // Если нет ни одного файла для этого номера — прекращаем
     if (!existsPlain && !existsA && !existsB) {
       hasAny = false;
       break;
     }
     
-    // Функция для добавления обработчика клика на изображение (если номер 2 или 18)
     const addClickHandler = (imgElement, num) => {
       if (num === 2) {
         imgElement.style.cursor = 'pointer';
@@ -502,7 +503,6 @@ async function showRules() {
       }
     };
     
-    // Если есть и A, и B — делаем переключалку
     if (existsA && existsB) {
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
@@ -545,7 +545,6 @@ async function showRules() {
       wrapper.appendChild(imgB);
       rulesContainer.appendChild(wrapper);
     }
-    // Иначе если есть обычный файл — показываем его
     else if (existsPlain) {
       const img = document.createElement('img');
       img.src = plainFile;
@@ -556,7 +555,6 @@ async function showRules() {
       addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
-    // Если есть только A (без B) — показываем A как статичное
     else if (existsA) {
       const img = document.createElement('img');
       img.src = fileA;
@@ -567,7 +565,6 @@ async function showRules() {
       addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
-    // Если есть только B (без A) — показываем B как статичное
     else if (existsB) {
       const img = document.createElement('img');
       img.src = fileB;
@@ -598,7 +595,6 @@ function showAbout() {
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
-  // Обновлённые номера: (8) -> бот, (9) -> правила, (10) -> Avito
   const aboutClickMap = {
     8: () => showBot(),
     9: () => showRules(),
