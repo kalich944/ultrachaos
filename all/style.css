@@ -54,12 +54,12 @@ body {
 
 #frameTop {
   top: 0;
-  transform: translateX(-50%) translateY(50px); /* сдвиг вниз */
+  transform: translateX(-50%) translateY(10px); /* сдвиг вниз */
 }
 
 #frameDown {
   bottom: 0;
-  transform: translateX(-50%) translateY(-50px); /* сдвиг вверх */
+  transform: translateX(-50%) translateY(-10px); /* сдвиг вверх */
 }
 
 @media screen and (min-width: 768px) {
