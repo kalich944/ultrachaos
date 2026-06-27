@@ -204,17 +204,14 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   img.style.height = 'auto';
   img.style.display = 'block';
   
-  // Клик для зума
-  img.style.cursor = 'pointer';
-  img.addEventListener('click', () => {
-    fullscreenImg.src = detailUrl || imageUrl;
-    fullscreen.classList.remove('hidden');
-  });
-  
-  cardDiv.appendChild(img);
-  
-  // Если есть детальная версия — добавляем уголок
+  // Если есть детальная версия — добавляем клик и уголок
   if (detailUrl) {
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', () => {
+      fullscreenImg.src = detailUrl;
+      fullscreen.classList.remove('hidden');
+    });
+    
     const cornerImg = document.createElement('img');
     cornerImg.src = 'gallery/corner.jpg';
     cornerImg.alt = 'подробности';
@@ -226,7 +223,9 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
     cornerImg.style.pointerEvents = 'none';
     cardDiv.appendChild(cornerImg);
   }
+  // Если нет деталей — карта просто показывается, без клика и уголка
   
+  cardDiv.appendChild(img);
   container.appendChild(cardDiv);
 }
 
