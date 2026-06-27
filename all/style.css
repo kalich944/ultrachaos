@@ -12,16 +12,16 @@ html, body {
 
 body {
   -webkit-overflow-scrolling: touch;
-  background-color: #000000; /* дублируем для надёжности */
+  background-color: #000000;
 }
 
 /* Общая обёртка для центрирования */
 #app-wrapper {
   width: 100%;
-  min-height: 100vh; /* занимает всю высоту */
+  min-height: 100vh;
   position: relative;
   background-color: #000000;
-  overflow-x: hidden; /* убираем горизонтальный скролл */
+  overflow-x: hidden;
 }
 
 @media screen and (min-width: 768px) {
@@ -73,7 +73,7 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный, в правом верхнем углу контента */
+/* Крестик — фиксированный, всегда в правом верхнем углу контента */
 #closeButton {
   position: fixed;
   top: 0;
@@ -85,17 +85,19 @@ body {
   pointer-events: auto;
 }
 
+/* На мобильных — прижат к правому краю окна */
 @media screen and (max-width: 767px) {
   #closeButton {
     right: 0;
   }
 }
 
+/* На компьютере и планшетах (ширина > 768px) — привязан к правому краю контента */
 @media screen and (min-width: 768px) {
   #closeButton {
     right: auto;
     left: 50%;
-    transform: translateX(calc(16.66% - 40px));
+    transform: translateX(calc(33.33% - 40px));
     top: 0;
   }
 }
