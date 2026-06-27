@@ -476,6 +476,17 @@ async function showRules() {
       break;
     }
     
+    // Функция для добавления обработчика клика на изображение (если номер 2 или 18)
+    const addClickHandler = (imgElement, num) => {
+      if (num === 2) {
+        imgElement.style.cursor = 'pointer';
+        imgElement.addEventListener('click', showAbout);
+      } else if (num === 18) {
+        imgElement.style.cursor = 'pointer';
+        imgElement.addEventListener('click', showBot);
+      }
+    };
+    
     // Если есть и A, и B — делаем переключалку
     if (existsA && existsB) {
       const wrapper = document.createElement('div');
@@ -489,6 +500,7 @@ async function showRules() {
       imgA.style.height = 'auto';
       imgA.style.display = 'block';
       imgA.style.cursor = 'pointer';
+      addClickHandler(imgA, i);
       
       const imgB = document.createElement('img');
       imgB.src = fileB;
@@ -497,6 +509,7 @@ async function showRules() {
       imgB.style.height = 'auto';
       imgB.style.display = 'none';
       imgB.style.cursor = 'pointer';
+      addClickHandler(imgB, i);
       
       let showA = true;
       const toggle = function() {
@@ -525,6 +538,7 @@ async function showRules() {
       img.style.width = '100%';
       img.style.height = 'auto';
       img.style.display = 'block';
+      addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
     // Если есть только A (без B) — показываем A как статичное
@@ -535,6 +549,7 @@ async function showRules() {
       img.style.width = '100%';
       img.style.height = 'auto';
       img.style.display = 'block';
+      addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
     // Если есть только B (без A) — показываем B как статичное
@@ -545,6 +560,7 @@ async function showRules() {
       img.style.width = '100%';
       img.style.height = 'auto';
       img.style.display = 'block';
+      addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
     
