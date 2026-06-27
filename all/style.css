@@ -70,10 +70,10 @@ body {
     max-width: 500px;
   }
   #frameTop {
-    transform: translateX(-50%) translateY(300px);
+    transform: translateX(-50%) translateY(100px);
   }
   #frameDown {
-    transform: translateX(-50%) translateY(-300px);
+    transform: translateX(-50%) translateY(-100px);
   }
 }
 
