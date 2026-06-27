@@ -7,17 +7,21 @@ html, body {
   background-color: #000000;
   touch-action: pan-y pinch-zoom;
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none; /* запрещает отскок на iOS */
 }
 
 body {
   -webkit-overflow-scrolling: touch;
+  background-color: #000000; /* дублируем для надёжности */
 }
 
 /* Общая обёртка для центрирования */
 #app-wrapper {
   width: 100%;
+  min-height: 100vh; /* занимает всю высоту */
   position: relative;
   background-color: #000000;
+  overflow-x: hidden; /* убираем горизонтальный скролл */
 }
 
 @media screen and (min-width: 768px) {
@@ -125,6 +129,9 @@ body {
   height: auto;
   display: block;
   border: none;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
 }
 
 /* Бот */
