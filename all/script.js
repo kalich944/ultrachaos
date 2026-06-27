@@ -462,9 +462,9 @@ async function showRules() {
   let hasAny = true;
   
   while (hasAny) {
-    const plainFile = `rules (${i}).png`;
-    const fileA = `rules (${i}a).png`;
-    const fileB = `rules (${i}b).png`;
+    const plainFile = `rules (${i}).jpg`;
+    const fileA = `rules (${i}a).jpg`;
+    const fileB = `rules (${i}b).jpg`;
     
     const existsPlain = await fileExists(plainFile);
     const existsA = await fileExists(fileA);
