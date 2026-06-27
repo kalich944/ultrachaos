@@ -567,10 +567,11 @@ function showAbout() {
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
   
+  // Обновлённые номера: (8) -> бот, (9) -> правила, (10) -> Avito
   const aboutClickMap = {
-    9: () => showBot(),
-    10: () => showRules(),
-    11: () => {
+    8: () => showBot(),
+    9: () => showRules(),
+    10: () => {
       window.open('https://www.avito.ru/brands/63979153b8bf07d6eb232ea8836f16b9/all/sport_i_otdyh?gdlkerfdnwq=101&page_from=from_item_card&iid=7826045800&sellerId=de3d7e1794b05276f5e69732a9ebbd1c', '_blank');
     }
   };
