@@ -33,7 +33,7 @@ let botOptions = [];
 let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
-let showCrystalOnNextClick = false; // флаг для опции 4
+let showCrystalOnNextClick = false;
 
 // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
 function fileExists(url) {
@@ -57,34 +57,29 @@ function getTelegramStartParam() {
   return null;
 }
 
-// ========== МЕНЮ: загружаем menu (1)...(8) с кликами, первое случайное ==========
+// ========== МЕНЮ ==========
 function loadMenuImages() {
   if (!imageContainer) return;
-  
   imageContainer.innerHTML = '';
   
-  // Для первого изображения выбираем случайный вариант из трёх
   const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
   const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
   
   for (let i = 1; i <= 8; i++) {
     if (i === 1) {
-      // Создаём обёртку для первого изображения и кнопки "about"
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
       wrapper.style.width = '100%';
       wrapper.style.display = 'block';
       
-      // Основное изображение
       const img = document.createElement('img');
       img.src = randomFirst;
-      img.alt = `Меню 1`;
+      img.alt = 'Меню 1';
       img.style.width = '100%';
       img.style.height = 'auto';
       img.style.display = 'block';
       wrapper.appendChild(img);
       
-      // Кнопка "about" (menu about.png) — кликабельная, с анимацией
       const aboutImg = document.createElement('img');
       aboutImg.src = 'menu about.png';
       aboutImg.alt = 'О игре';
@@ -105,7 +100,6 @@ function loadMenuImages() {
       continue;
     }
     
-    // Остальные изображения (2..8)
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
@@ -113,7 +107,6 @@ function loadMenuImages() {
     img.style.height = 'auto';
     img.style.display = 'block';
     
-    // Назначаем обработчики кликов по номерам
     if (i === 3) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showBot());
@@ -134,21 +127,15 @@ function loadMenuImages() {
         window.open('https://t.me/ultrachaosAKB', '_blank');
       });
     }
-    // Для i === 8 — без клика
     
     imageContainer.appendChild(img);
   }
 }
 
-// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ С ПОДДЕРЖКОЙ КЛИКОВ ==========
+// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ==========
 function loadImages(container, baseName, startNumber = 1, clickMap = null) {
-  if (!container) {
-    console.error('Контейнер не найден:', baseName);
-    return;
-  }
-  
+  if (!container) return;
   container.innerHTML = '';
-  console.log(`Загрузка ${baseName}...`);
   
   let i = startNumber;
   let loadedCount = 0;
@@ -187,9 +174,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (стабильная, с сохранением порядка) ==========
-
-// Функция добавления карты с уголком, если есть детальная версия
+// ========== ГАЛЕРЕЯ (стабильная) ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -204,7 +189,6 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   img.style.height = 'auto';
   img.style.display = 'block';
   
-  // Если есть детальная версия — добавляем клик и уголок
   if (detailUrl) {
     img.style.cursor = 'pointer';
     img.addEventListener('click', () => {
@@ -223,7 +207,6 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
     cornerImg.style.pointerEvents = 'none';
     cardDiv.appendChild(cornerImg);
   }
-  // Если нет деталей — карта просто показывается, без клика и уголка
   
   cardDiv.appendChild(img);
   container.appendChild(cardDiv);
@@ -235,8 +218,7 @@ async function loadGallery() {
     return;
   }
   
-  console.log('Загрузка галереи (стабильная)...');
-  
+  console.log('Загрузка галереи...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
@@ -245,7 +227,6 @@ async function loadGallery() {
   const galleryPath = 'gallery/';
   
   try {
-    // Загружаем основную галерею (1.jpg, 1a.jpg, 1b.jpg, 1c.jpg)
     for (let i = 1; i <= 200; i++) {
       const baseUrl = `${galleryPath}${i}.jpg`;
       const aUrl = `${galleryPath}${i}a.jpg`;
@@ -259,9 +240,7 @@ async function loadGallery() {
         fileExists(cUrl)
       ]);
       
-      if (!hasBase && !hasA && !hasB && !hasC) {
-        continue;
-      }
+      if (!hasBase && !hasA && !hasB && !hasC) continue;
       
       if (hasBase) {
         const detailUrl = `${galleryPath}d${i}.jpg`;
@@ -278,7 +257,6 @@ async function loadGallery() {
       }
     }
     
-    // Загружаем серии p, a, w
     const series = [
       { prefix: 'p', gallery: pGallery, max: 100 },
       { prefix: 'a', gallery: aGallery, max: 100 },
@@ -296,7 +274,7 @@ async function loadGallery() {
       }
     }
     
-    console.log('Галерея загружена (стабильная)');
+    console.log('Галерея загружена');
   } catch (error) {
     console.error('Ошибка загрузки галереи:', error);
   }
@@ -310,26 +288,13 @@ async function loadGallery() {
 // ========== ГЛУБОКИЕ ССЫЛКИ ==========
 function handleDeepLink(hash) {
   if (!hash || hash === '#') return;
-  
-  console.log('Обработка ссылки:', hash);
-  
   const target = hash.startsWith('#') ? hash.substring(1) : hash;
   
-  if (target.startsWith('rules-')) {
-    showRules();
-  }
-  else if (target.startsWith('gallery-')) {
-    showGallery();
-  }
-  else if (target === 'bot') {
-    showBot();
-  }
-  else if (target === 'about') {
-    showAbout();
-  }
-  else if (target === 'menu') {
-    showMenu();
-  }
+  if (target.startsWith('rules-')) showRules();
+  else if (target.startsWith('gallery-')) showGallery();
+  else if (target === 'bot') showBot();
+  else if (target === 'about') showAbout();
+  else if (target === 'menu') showMenu();
 }
 
 // ========== БОТ ==========
@@ -403,8 +368,18 @@ function showBotReady() {
 }
 
 function handleBotClick() {
+  // Принудительно скрываем заставку при любом клике
+  botOpening.style.display = 'none';
+  
+  // Эффект дрожания
+  botContainer.classList.remove('shake');
+  void botContainer.offsetWidth;
+  botContainer.classList.add('shake');
+  setTimeout(() => {
+    botContainer.classList.remove('shake');
+  }, 300);
+  
   if (botFirstClick) {
-    botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
@@ -459,7 +434,6 @@ function showMenu() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'none';
-  
   loadMenuImages();
 }
 
@@ -474,7 +448,6 @@ async function showRules() {
   closeButton.style.display = 'block';
   
   rulesContainer.innerHTML = '';
-  
   let i = 1;
   let hasAny = true;
   
