@@ -46,6 +46,8 @@ body {
   z-index: 1001;
   pointer-events: none;
   width: 100%; /* по умолчанию на мобильных */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media screen and (min-width: 768px) {
