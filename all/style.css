@@ -40,7 +40,7 @@ body {
   }
 }
 
-/* Рамки — смещены на 300px для скрытия добавленных чёрных полей */
+/* Рамки — смещены для компенсации добавленных чёрных полей */
 #frameTop,
 #frameDown {
   position: fixed;
@@ -54,12 +54,12 @@ body {
 
 #frameTop {
   top: 0;
-  transform: translateX(-50%) translateY(-300px);
+  transform: translateX(-50%) translateY(300px); /* сдвиг вниз */
 }
 
 #frameDown {
   bottom: 0;
-  transform: translateX(-50%) translateY(300px);
+  transform: translateX(-50%) translateY(-300px); /* сдвиг вверх */
 }
 
 @media screen and (min-width: 768px) {
@@ -70,10 +70,10 @@ body {
     max-width: 500px;
   }
   #frameTop {
-    transform: translateX(-50%) translateY(-300px);
+    transform: translateX(-50%) translateY(300px);
   }
   #frameDown {
-    transform: translateX(-50%) translateY(300px);
+    transform: translateX(-50%) translateY(-300px);
   }
 }
 
