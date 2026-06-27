@@ -45,7 +45,7 @@ body {
   transform: translateX(-50%);
   z-index: 1001;
   pointer-events: none;
-  width: 100%; /* по умолчанию на мобильных */
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -69,11 +69,10 @@ body {
   height: auto;
 }
 
-/* Крестик — фиксированный, привязан к рабочей области */
+/* Крестик — фиксированный, в правом верхнем углу контента */
 #closeButton {
   position: fixed;
-  top: 15px;
-  right: 15px;
+  top: 0;
   width: 40px;
   height: 40px;
   cursor: pointer;
@@ -82,12 +81,18 @@ body {
   pointer-events: auto;
 }
 
+@media screen and (max-width: 767px) {
+  #closeButton {
+    right: 0;
+  }
+}
+
 @media screen and (min-width: 768px) {
   #closeButton {
     right: auto;
     left: 50%;
-    transform: translateX(calc(16.66% - 55px));
-    top: 15px;
+    transform: translateX(calc(16.66% - 40px));
+    top: 0;
   }
 }
 
@@ -120,17 +125,6 @@ body {
   height: auto;
   display: block;
   border: none;
-}
-
-/* Запрещаем зум для about */
-#aboutContainer.no-zoom {
-  touch-action: pan-y pinch-zoom;
-}
-
-#aboutContainer.no-zoom img {
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 /* Бот */
