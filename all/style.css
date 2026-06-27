@@ -1,453 +1,291 @@
-// Экраны
-const menuScreen = document.getElementById('menu-screen');
-const rulesScreen = document.getElementById('rules-screen');
-const botScreen = document.getElementById('bot-screen');
-const galleryScreen = document.getElementById('gallery-screen');
-const aboutScreen = document.getElementById('about-screen');
-const closeButton = document.getElementById('closeButton');
-const fullscreen = document.getElementById('fullscreen');
-const fullscreenImg = document.getElementById('fullscreen-img');
-
-// Контейнеры
-const imageContainer = document.getElementById('imageContainer');
-const rulesContainer = document.getElementById('rulesContainer');
-const aboutContainer = document.getElementById('aboutContainer');
-
-// Элементы бота
-const botContainer = document.getElementById('botContainer');
-const botOpening = document.getElementById('bot-opening');
-const botCrystal = document.getElementById('bot-crystal');
-const botOption = document.getElementById('bot-option');
-
-// Элементы галереи
-const mainGallery = document.getElementById('main-gallery');
-const pGallery = document.getElementById('p-gallery');
-const aGallery = document.getElementById('a-gallery');
-const wGallery = document.getElementById('w-gallery');
-
-// Динамические массивы
-let botCrystals = [];
-let botOptions = [];
-
-// Текущий экран
-let currentScreen = 'menu';
-let botFirstClick = true;
-let pendingHash = null;
-let showCrystalOnNextClick = false;
-
-// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
-function fileExists(url) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = url;
-  });
+/* Базовые стили */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #000000;
+  touch-action: pan-y pinch-zoom;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
 
-// ========== ЧТЕНИЕ ПАРАМЕТРОВ ИЗ TELEGRAM ==========
-function getTelegramStartParam() {
-  try {
-    if (window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
-      return window.Telegram.WebApp.initDataUnsafe.start_param;
-    }
-  } catch (e) {
-    console.log('Не удалось прочитать start_param');
+body {
+  -webkit-overflow-scrolling: touch;
+  background-color: #000000;
+}
+
+#app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background-color: #000000;
+  overflow-x: hidden;
+}
+
+@media screen and (min-width: 768px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #000000;
   }
-  return null;
-}
-
-// ========== МЕНЮ: загружаем menu (1)...(8) с кликами, первое случайное ==========
-function loadMenuImages() {
-  if (!imageContainer) return;
   
-  imageContainer.innerHTML = '';
-  
-  const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
-  const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
-  
-  for (let i = 1; i <= 8; i++) {
-    if (i === 1) {
-      const wrapper = document.createElement('div');
-      wrapper.style.position = 'relative';
-      wrapper.style.width = '100%';
-      wrapper.style.display = 'block';
-      
-      const img = document.createElement('img');
-      img.src = randomFirst;
-      img.alt = `Меню 1`;
-      img.style.width = '100%';
-      img.style.height = 'auto';
-      img.style.display = 'block';
-      wrapper.appendChild(img);
-      
-      const aboutImg = document.createElement('img');
-      aboutImg.src = 'menu about.png';
-      aboutImg.alt = 'О игре';
-      aboutImg.style.position = 'absolute';
-      aboutImg.style.top = '5%';
-      aboutImg.style.right = '5%';
-      aboutImg.style.width = '25%';
-      aboutImg.style.height = 'auto';
-      aboutImg.style.cursor = 'pointer';
-      aboutImg.classList.add('floating');
-      aboutImg.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showAbout();
-      });
-      wrapper.appendChild(aboutImg);
-      
-      imageContainer.appendChild(wrapper);
-      continue;
-    }
-    
-    const img = document.createElement('img');
-    img.src = `menu (${i}).png`;
-    img.alt = `Меню ${i}`;
-    img.style.width = '100%';
-    img.style.height = 'auto';
-    img.style.display = 'block';
-    
-    if (i === 3) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => showBot());
-    } else if (i === 4) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => {
-        window.open('https://www.avito.ru/brands/63979153b8bf07d6eb232ea8836f16b9/all/sport_i_otdyh?gdlkerfdnwq=101&page_from=from_item_card&iid=7826045800&sellerId=de3d7e1794b05276f5e69732a9ebbd1c', '_blank');
-      });
-    } else if (i === 5) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => showRules());
-    } else if (i === 6) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => showGallery());
-    } else if (i === 7) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => {
-        window.open('https://t.me/ultrachaosAKB', '_blank');
-      });
-    }
-    
-    imageContainer.appendChild(img);
+  #app-wrapper {
+    width: 33.33%;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #000000;
   }
 }
 
-// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ПОСЛЕДОВАТЕЛЬНЫХ ИЗОБРАЖЕНИЙ ==========
-function loadImages(container, baseName, startNumber = 1, clickMap = null) {
-  if (!container) return;
-  container.innerHTML = '';
-  
-  let i = startNumber;
-  let loadedCount = 0;
-  
-  function loadNext() {
-    const img = new Image();
-    const currentIndex = i;
-    const imgPath = `${baseName} (${currentIndex}).png`;
-    
-    img.onload = function() {
-      img.alt = `${baseName} ${currentIndex}`;
-      img.id = `${baseName}-${currentIndex}`;
-      
-      if (clickMap && clickMap[currentIndex]) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', clickMap[currentIndex]);
-      }
-      
-      container.appendChild(img);
-      loadedCount++;
-      i++;
-      loadNext();
-    };
-    
-    img.onerror = function() {
-      console.log(`Загружено ${loadedCount} изображений ${baseName}`);
-      if (pendingHash) {
-        handleDeepLink(pendingHash);
-        pendingHash = null;
-      }
-    };
-    
-    img.src = imgPath;
-  }
-  
-  loadNext();
+/* Рамки */
+#frameTop,
+#frameDown {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  pointer-events: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-// ========== ГАЛЕРЕЯ (стабильная) ==========
-function addCardWithCorner(container, imageUrl, detailUrl, alt) {
-  const cardDiv = document.createElement('div');
-  cardDiv.style.position = 'relative';
-  cardDiv.style.display = 'inline-block';
-  cardDiv.style.width = '100%';
-  
-  const img = document.createElement('img');
-  img.src = imageUrl;
-  img.alt = alt;
-  img.className = 'card-image';
-  img.style.width = '100%';
-  img.style.height = 'auto';
-  img.style.display = 'block';
-  
-  if (detailUrl) {
-    img.style.cursor = 'pointer';
-    img.addEventListener('click', () => {
-      fullscreenImg.src = detailUrl;
-      fullscreen.classList.remove('hidden');
-    });
-    
-    const cornerImg = document.createElement('img');
-    cornerImg.src = 'gallery/corner.jpg';
-    cornerImg.alt = 'подробности';
-    cornerImg.style.position = 'absolute';
-    cornerImg.style.top = '0';
-    cornerImg.style.right = '0';
-    cornerImg.style.width = '12.5%';
-    cornerImg.style.height = 'auto';
-    cornerImg.style.pointerEvents = 'none';
-    cardDiv.appendChild(cornerImg);
-  }
-  
-  cardDiv.appendChild(img);
-  container.appendChild(cardDiv);
-}
-
-async function loadGallery() {
-  if (!mainGallery || !pGallery || !aGallery || !wGallery) {
-    console.error('Элементы галереи не найдены');
-    return;
-  }
-  
-  console.log('Загрузка галереи...');
-  mainGallery.innerHTML = '';
-  pGallery.innerHTML = '';
-  aGallery.innerHTML = '';
-  wGallery.innerHTML = '';
-  
-  const galleryPath = 'gallery/';
-  
-  try {
-    for (let i = 1; i <= 200; i++) {
-      const baseUrl = `${galleryPath}${i}.jpg`;
-      const aUrl = `${galleryPath}${i}a.jpg`;
-      const bUrl = `${galleryPath}${i}b.jpg`;
-      const cUrl = `${galleryPath}${i}c.jpg`;
-      
-      const [hasBase, hasA, hasB, hasC] = await Promise.all([
-        fileExists(baseUrl),
-        fileExists(aUrl),
-        fileExists(bUrl),
-        fileExists(cUrl)
-      ]);
-      
-      if (!hasBase && !hasA && !hasB && !hasC) continue;
-      
-      if (hasBase) {
-        const detailUrl = `${galleryPath}d${i}.jpg`;
-        const hasDetail = await fileExists(detailUrl);
-        addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
-      }
-      
-      for (let [url, letter] of [[aUrl, 'a'], [bUrl, 'b'], [cUrl, 'c']]) {
-        if (await fileExists(url)) {
-          const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
-          const hasDetail = await fileExists(detailUrl);
-          addCardWithCorner(mainGallery, url, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
-        }
-      }
-    }
-    
-    const series = [
-      { prefix: 'p', gallery: pGallery, max: 100 },
-      { prefix: 'a', gallery: aGallery, max: 100 },
-      { prefix: 'w', gallery: wGallery, max: 100 }
-    ];
-    
-    for (let s of series) {
-      for (let i = 1; i <= s.max; i++) {
-        const url = `${galleryPath}${s.prefix}${i}.jpg`;
-        const exists = await fileExists(url);
-        if (!exists) break;
-        const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
-        const hasDetail = await fileExists(detailUrl);
-        addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
-      }
-    }
-    
-    console.log('Галерея загружена');
-  } catch (error) {
-    console.error('Ошибка загрузки галереи:', error);
-  }
-  
-  if (pendingHash && pendingHash.startsWith('#gallery-')) {
-    handleDeepLink(pendingHash);
-    pendingHash = null;
+@media screen and (min-width: 768px) {
+  #frameTop,
+  #frameDown {
+    width: 33.33%;
+    min-width: 300px;
+    max-width: 500px;
   }
 }
 
-// ========== ГЛУБОКИЕ ССЫЛКИ ==========
-function handleDeepLink(hash) {
-  if (!hash || hash === '#') return;
-  const target = hash.startsWith('#') ? hash.substring(1) : hash;
-  
-  if (target.startsWith('rules-')) showRules();
-  else if (target.startsWith('gallery-')) showGallery();
-  else if (target === 'bot') showBot();
-  else if (target === 'about') showAbout();
-  else if (target === 'menu') showMenu();
+#frameTop {
+  top: 0;
+  height: auto;
 }
 
-// ========== БОТ ==========
-function loadBotCrystals() {
-  botCrystals = [];
-  let i = 1;
-  
-  function loadNext() {
-    const img = new Image();
-    const currentIndex = i;
-    const imgPath = `bot crys (${currentIndex}).JPG`;
-    
-    img.onload = function() {
-      if (currentIndex !== 9) {
-        botCrystals.push(imgPath);
-      }
-      i++;
-      loadNext();
-    };
-    
-    img.onerror = function() {
-      console.log(`Загружено кристаллов: ${botCrystals.length}`);
-      loadBotOptions();
-    };
-    
-    img.src = imgPath;
-  }
-  
-  loadNext();
+#frameDown {
+  bottom: 0;
+  height: auto;
 }
 
-function loadBotOptions() {
-  botOptions = [];
-  let i = 1;
-  
-  function loadNext() {
-    const img = new Image();
-    const currentIndex = i;
-    const imgPath = `bot (${currentIndex}).jpg`;
-    
-    img.onload = function() {
-      botOptions.push(imgPath);
-      i++;
-      loadNext();
-    };
-    
-    img.onerror = function() {
-      console.log(`Загружено опций: ${botOptions.length}`);
-      showBotReady();
-    };
-    
-    img.src = imgPath;
-  }
-  
-  loadNext();
+/* Крестик */
+#closeButton {
+  position: fixed;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 1002;
+  display: none;
+  pointer-events: auto;
 }
 
-function showBotReady() {
-  if (botCrystals.length > 0) {
-    botCrystal.src = botCrystals[0];
-  }
-  if (botOptions.length > 0) {
-    botOption.src = botOptions[0];
-  }
-  
-  botOpening.style.display = 'block';
-  botCrystal.style.display = 'none';
-  botOption.style.display = 'none';
-  botFirstClick = true;
-  showCrystalOnNextClick = false;
-}
-
-function handleBotClick() {
-  // Принудительно скрываем заставку при любом клике
-  botOpening.style.display = 'none';
-  
-  // Эффект дрожания
-  botContainer.classList.remove('shake');
-  void botContainer.offsetWidth; // перезапуск анимации
-  botContainer.classList.add('shake');
-  setTimeout(() => {
-    botContainer.classList.remove('shake');
-  }, 300);
-  
-  if (botFirstClick) {
-    botCrystal.style.display = 'block';
-    botOption.style.display = 'block';
-    botFirstClick = false;
-    
-    const currentOption = botOption.src;
-    if (currentOption.includes('bot (4).jpg')) {
-      botCrystal.src = 'bot crys (9).JPG';
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = true;
-    } else {
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
-    }
-    return;
-  }
-  
-  if (showCrystalOnNextClick) {
-    if (botCrystals.length > 0) {
-      const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
-      botCrystal.src = randomCrystal;
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
-    }
-    return;
-  }
-  
-  if (botCrystals.length > 0 && botOptions.length > 0) {
-    const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
-    const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
-    botCrystal.src = randomCrystal;
-    botOption.src = randomOption;
-    botCrystal.style.display = 'block';
-    
-    if (randomOption.includes('bot (4).jpg')) {
-      botCrystal.src = 'bot crys (9).JPG';
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = true;
-    } else {
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
-    }
+@media screen and (max-width: 767px) {
+  #closeButton {
+    right: 0;
   }
 }
 
-// ========== ПОКАЗ ЭКРАНОВ ==========
-function showMenu() { /* ... как было ... */ }
-function showRules() { /* ... как было ... */ }
-function showAbout() { /* ... как было ... */ }
-function showBot() { /* ... как было ... */ }
-function showGallery() { /* ... как было ... */ }
-
-// ========== СОБЫТИЯ ==========
-closeButton.addEventListener('click', showMenu);
-botContainer.addEventListener('click', handleBotClick);
-
-fullscreen.addEventListener('click', () => {
-  fullscreen.classList.add('hidden');
-  fullscreenImg.src = '';
-});
-
-// ========== ИНИЦИАЛИЗАЦИЯ ==========
-console.log('Приложение запущено');
-
-const startParam = getTelegramStartParam();
-if (startParam) {
-  console.log('Start param:', startParam);
-  pendingHash = '#' + startParam;
+@media screen and (min-width: 768px) {
+  #closeButton {
+    right: auto;
+    left: 50%;
+    transform: translateX(calc(33.33% - 40px));
+    top: 0;
+  }
 }
 
-showMenu();
+/* Экраны */
+.screen {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#imageContainer, #rulesContainer, #aboutContainer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: #000000;
+}
+
+#imageContainer img, #rulesContainer img, #aboutContainer img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: none;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+}
+
+/* Бот */
+.bot-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #000000;
+}
+
+#botContainer {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  aspect-ratio: 1000 / 1529;
+  background-image: url('bot back.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #000000;
+  margin: 0 auto;
+  z-index: 1;
+  touch-action: none;
+}
+
+#bot-opening {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: contain;
+  z-index: 2;
+  pointer-events: none;
+}
+
+#bot-crystal {
+  position: absolute;
+  width: 89.3%;
+  height: auto;
+  top: 6.15%;
+  left: 50%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  display: none;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#bot-option {
+  position: absolute;
+  width: 93%;
+  height: auto;
+  top: 66.42%;
+  left: 50%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  display: none;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ===== ГАЛЕРЕЯ ===== */
+.gallery-container {
+  width: 100%;
+  padding: 0;
+  text-align: center;
+  background-color: #ffffff;
+}
+
+.header-image,
+.pam-image,
+.archive-image,
+.weapon-image,
+.end-image {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  background-color: #ffffff;
+}
+
+.gallery-grid .card-image {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Полноэкранный режим */
+#fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#fullscreen.hidden {
+  display: none;
+}
+
+#fullscreen-img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+/* Для очень высоких экранов */
+@media screen and (min-aspect-ratio: 1000/1529) {
+  .bot-wrapper {
+    padding: 20px 0;
+  }
+}
+
+/* ===== Плавающая кнопка "Об игре" ===== */
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ===== Анимация дрожания ===== */
+@keyframes shake {
+  0% { transform: translateX(0px); }
+  10% { transform: translateX(-4px) rotate(-1deg); }
+  20% { transform: translateX(4px) rotate(1deg); }
+  30% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  50% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  70% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+  90% { transform: translateX(0px); }
+  100% { transform: translateX(0px); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
