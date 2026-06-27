@@ -40,16 +40,26 @@ body {
   }
 }
 
-/* Рамки */
+/* Рамки — смещены на 300px для скрытия добавленных чёрных полей */
 #frameTop,
 #frameDown {
   position: fixed;
   left: 50%;
-  transform: translateX(-50%);
   z-index: 1001;
   pointer-events: none;
   width: 100%;
+  height: auto;
   box-sizing: border-box;
+}
+
+#frameTop {
+  top: 0;
+  transform: translateX(-50%) translateY(-300px);
+}
+
+#frameDown {
+  bottom: 0;
+  transform: translateX(-50%) translateY(300px);
 }
 
 @media screen and (min-width: 768px) {
@@ -59,16 +69,12 @@ body {
     min-width: 300px;
     max-width: 500px;
   }
-}
-
-#frameTop {
-  top: 0;
-  height: auto;
-}
-
-#frameDown {
-  bottom: 0;
-  height: auto;
+  #frameTop {
+    transform: translateX(-50%) translateY(-300px);
+  }
+  #frameDown {
+    transform: translateX(-50%) translateY(300px);
+  }
 }
 
 /* Крестик */
