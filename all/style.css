@@ -274,16 +274,16 @@ body {
   100% { transform: translateY(0px); }
 }
 
-/* ===== ЧЁРНЫЕ ОВЕРЛЕИ ДЛЯ iPHONE (перекрывают контент за рамками) ===== */
+/* ===== ЧЁРНЫЕ ОВЕРЛЕИ (под рамками) ===== */
 #overlay-top,
 #overlay-bottom {
   position: fixed;
   left: 0;
   width: 100%;
-  height: 30vh; /* достаточно, чтобы перекрыть любые вылезания */
+  height: 30vh;
   background-color: #000000;
-  z-index: 1000; /* под рамками (1001) и крестиком (1002) */
-  pointer-events: none; /* чтобы не мешать кликам */
+  z-index: 999;
+  pointer-events: none;
 }
 
 #overlay-top {
@@ -294,7 +294,6 @@ body {
   bottom: 0;
 }
 
-/* На компьютере оверлеи должны быть только по ширине контента */
 @media screen and (min-width: 768px) {
   #overlay-top,
   #overlay-bottom {
