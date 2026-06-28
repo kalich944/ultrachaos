@@ -174,7 +174,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (стабильная) ==========
+// ========== ГАЛЕРЕЯ ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -308,6 +308,7 @@ function loadBotCrystals() {
     const imgPath = `bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
+      // Исключаем кристалл номер 9 из общего массива
       if (currentIndex !== 9) {
         botCrystals.push(imgPath);
       }
@@ -353,13 +354,22 @@ function loadBotOptions() {
 }
 
 function showBotReady() {
+  // Выбираем случайные изображения для старта (кристалл не 9)
+  let randomCrystal = botCrystals[0];
   if (botCrystals.length > 0) {
-    botCrystal.src = botCrystals[0];
+    const filtered = botCrystals.filter(src => !src.includes('bot crys (9).JPG'));
+    if (filtered.length > 0) {
+      randomCrystal = filtered[Math.floor(Math.random() * filtered.length)];
+    } else {
+      randomCrystal = botCrystals[0];
+    }
   }
-  if (botOptions.length > 0) {
-    botOption.src = botOptions[0];
-  }
+  const randomOption = botOptions.length > 0 ? botOptions[Math.floor(Math.random() * botOptions.length)] : '';
   
+  botCrystal.src = randomCrystal;
+  botOption.src = randomOption;
+  
+  // Показываем заставку, скрываем кристалл и опцию
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
@@ -368,7 +378,7 @@ function showBotReady() {
 }
 
 function handleBotClick() {
-  // Принудительно скрываем заставку при любом клике
+  // Принудительно скрываем заставку при любом клике (если она ещё видна)
   botOpening.style.display = 'none';
   
   // Эффект дрожания
@@ -379,13 +389,16 @@ function handleBotClick() {
     botContainer.classList.remove('shake');
   }, 300);
   
+  // Если это первый клик (только что скрыли заставку)
   if (botFirstClick) {
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
     
+    // Проверяем, не является ли текущая опция 4
     const currentOption = botOption.src;
     if (currentOption.includes('bot (4).jpg')) {
+      // Если опция 4, показываем кристалл 9
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true;
@@ -396,8 +409,10 @@ function handleBotClick() {
     return;
   }
   
+  // Если ожидается показ кристалла (опция 4 без смены)
   if (showCrystalOnNextClick) {
     if (botCrystals.length > 0) {
+      // Выбираем случайный кристалл (не 9, т.к. 9 исключён из массива)
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
       botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
@@ -406,6 +421,7 @@ function handleBotClick() {
     return;
   }
   
+  // Обычный клик: меняем и кристалл, и опцию случайно
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
@@ -414,6 +430,7 @@ function handleBotClick() {
     botCrystal.style.display = 'block';
     
     if (randomOption.includes('bot (4).jpg')) {
+      // Если выпала опция 4, ставим кристалл 9 и устанавливаем флаг
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true;
@@ -588,10 +605,14 @@ function showBot() {
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
+  // Сбрасываем состояние перед загрузкой
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
+  botFirstClick = true;
+  showCrystalOnNextClick = false;
   
+  // Загружаем массивы
   loadBotCrystals();
 }
 
