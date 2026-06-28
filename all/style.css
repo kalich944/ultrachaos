@@ -54,12 +54,12 @@ body {
 
 #frameTop {
   top: 0;
-  transform: translateX(-50%) translateY(10px); /* сдвиг вниз */
+  transform: translateX(-50%) translateY(-10px); /* сдвиг вниз */
 }
 
 #frameDown {
   bottom: 0;
-  transform: translateX(-50%) translateY(-10px); /* сдвиг вверх */
+  transform: translateX(-50%) translateY(10px); /* сдвиг вверх */
 }
 
 @media screen and (min-width: 768px) {
@@ -70,10 +70,10 @@ body {
     max-width: 500px;
   }
   #frameTop {
-    transform: translateX(-50%) translateY(50px);
+    transform: translateX(-50%) translateY(-10px);
   }
   #frameDown {
-    transform: translateX(-50%) translateY(-50px);
+    transform: translateX(-50%) translateY(10px);
   }
 }
 
