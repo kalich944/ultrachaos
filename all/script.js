@@ -174,7 +174,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ ==========
+// ========== ГАЛЕРЕЯ (ОПТИМИЗИРОВАННАЯ, ПАРАЛЛЕЛЬНАЯ ЗАГРУЗКА) ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -218,67 +218,98 @@ async function loadGallery() {
     return;
   }
   
-  console.log('Загрузка галереи...');
+  console.log('Загрузка галереи (быстрая, параллельная)...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
   wGallery.innerHTML = '';
   
   const galleryPath = 'gallery/';
+  const allChecks = [];
   
-  try {
-    for (let i = 1; i <= 200; i++) {
-      const baseUrl = `${galleryPath}${i}.jpg`;
-      const aUrl = `${galleryPath}${i}a.jpg`;
-      const bUrl = `${galleryPath}${i}b.jpg`;
-      const cUrl = `${galleryPath}${i}c.jpg`;
-      
-      const [hasBase, hasA, hasB, hasC] = await Promise.all([
-        fileExists(baseUrl),
-        fileExists(aUrl),
-        fileExists(bUrl),
-        fileExists(cUrl)
-      ]);
-      
-      if (!hasBase && !hasA && !hasB && !hasC) continue;
-      
-      if (hasBase) {
-        const detailUrl = `${galleryPath}d${i}.jpg`;
-        const hasDetail = await fileExists(detailUrl);
-        addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
-      }
-      
-      for (let [url, letter] of [[aUrl, 'a'], [bUrl, 'b'], [cUrl, 'c']]) {
-        if (await fileExists(url)) {
-          const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
-          const hasDetail = await fileExists(detailUrl);
-          addCardWithCorner(mainGallery, url, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
-        }
-      }
-    }
-    
-    const series = [
-      { prefix: 'p', gallery: pGallery, max: 100 },
-      { prefix: 'a', gallery: aGallery, max: 100 },
-      { prefix: 'w', gallery: wGallery, max: 100 }
-    ];
-    
-    for (let s of series) {
-      for (let i = 1; i <= s.max; i++) {
-        const url = `${galleryPath}${s.prefix}${i}.jpg`;
-        const exists = await fileExists(url);
-        if (!exists) break;
-        const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
-        const hasDetail = await fileExists(detailUrl);
-        addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
-      }
-    }
-    
-    console.log('Галерея загружена');
-  } catch (error) {
-    console.error('Ошибка загрузки галереи:', error);
+  // Собираем все URL для проверки
+  const urlsToCheck = [];
+  
+  // Основная галерея: 1.jpg, 1a.jpg, 1b.jpg, 1c.jpg ... до 200
+  for (let i = 1; i <= 200; i++) {
+    urlsToCheck.push({ url: `${galleryPath}${i}.jpg`, type: 'base', index: i });
+    urlsToCheck.push({ url: `${galleryPath}${i}a.jpg`, type: 'a', index: i });
+    urlsToCheck.push({ url: `${galleryPath}${i}b.jpg`, type: 'b', index: i });
+    urlsToCheck.push({ url: `${galleryPath}${i}c.jpg`, type: 'c', index: i });
   }
   
+  // Серии p, a, w
+  const series = ['p', 'a', 'w'];
+  for (let s of series) {
+    for (let i = 1; i <= 100; i++) {
+      urlsToCheck.push({ url: `${galleryPath}${s}${i}.jpg`, type: `series_${s}`, index: i });
+    }
+  }
+  
+  // Параллельная проверка всех файлов
+  const checkPromises = urlsToCheck.map(item => 
+    fileExists(item.url).then(exists => ({ ...item, exists }))
+  );
+  
+  const results = await Promise.all(checkPromises);
+  
+  // Фильтруем существующие файлы
+  const existing = results.filter(r => r.exists);
+  
+  // Группируем по типу для сохранения порядка
+  const baseItems = existing.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
+  const aItems = existing.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
+  const bItems = existing.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
+  const cItems = existing.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
+  
+  // Добавляем в правильном порядке: base, потом a, b, c для каждого номера
+  const allMain = [];
+  for (let i = 1; i <= 200; i++) {
+    const base = baseItems.find(r => r.index === i);
+    if (base) allMain.push(base);
+    const a = aItems.find(r => r.index === i);
+    if (a) allMain.push(a);
+    const b = bItems.find(r => r.index === i);
+    if (b) allMain.push(b);
+    const c = cItems.find(r => r.index === i);
+    if (c) allMain.push(c);
+  }
+  
+  // Добавляем основные карты с проверкой деталей
+  for (let item of allMain) {
+    const detailUrl = item.url.replace(/\.jpg$/, (match) => {
+      // Определяем, есть ли буква
+      const base = item.url.match(/(\d+)([a-c])?\.jpg$/);
+      if (base && base[2]) {
+        return `d${base[1]}${base[2]}.jpg`;
+      } else if (base) {
+        return `d${base[1]}.jpg`;
+      }
+      return '';
+    });
+    const hasDetail = await fileExists(detailUrl);
+    addCardWithCorner(mainGallery, item.url, hasDetail ? detailUrl : null, `Карта ${item.index}`);
+  }
+  
+  // Теперь серии
+  for (let s of series) {
+    const seriesItems = existing.filter(r => r.type === `series_${s}`).sort((a, b) => a.index - b.index);
+    for (let item of seriesItems) {
+      const detailUrl = item.url.replace(/\.jpg$/, `d${item.index}.jpg`); // для серий формат dP1.jpg?
+      // Уточним: для серий p, a, w детальная версия называется dP1.jpg, dA1.jpg, dW1.jpg
+      const detailUrlCorrect = item.url.replace(/([a-w])(\d+)\.jpg$/, (match, letter, num) => {
+        return `d${letter}${num}.jpg`;
+      });
+      const hasDetail = await fileExists(detailUrlCorrect);
+      let container;
+      if (s === 'p') container = pGallery;
+      else if (s === 'a') container = aGallery;
+      else if (s === 'w') container = wGallery;
+      addCardWithCorner(container, item.url, hasDetail ? detailUrlCorrect : null, `Карта ${s}${item.index}`);
+    }
+  }
+  
+  console.log('Галерея загружена (быстрая)');
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
@@ -308,7 +339,6 @@ function loadBotCrystals() {
     const imgPath = `bot crys (${currentIndex}).JPG`;
     
     img.onload = function() {
-      // Исключаем кристалл номер 9 из общего массива
       if (currentIndex !== 9) {
         botCrystals.push(imgPath);
       }
@@ -354,7 +384,6 @@ function loadBotOptions() {
 }
 
 function showBotReady() {
-  // Выбираем случайные изображения для старта (кристалл не 9)
   let randomCrystal = botCrystals[0];
   if (botCrystals.length > 0) {
     const filtered = botCrystals.filter(src => !src.includes('bot crys (9).JPG'));
@@ -369,7 +398,6 @@ function showBotReady() {
   botCrystal.src = randomCrystal;
   botOption.src = randomOption;
   
-  // Показываем заставку, скрываем кристалл и опцию
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
@@ -378,10 +406,8 @@ function showBotReady() {
 }
 
 function handleBotClick() {
-  // Принудительно скрываем заставку при любом клике (если она ещё видна)
   botOpening.style.display = 'none';
   
-  // Эффект дрожания
   botContainer.classList.remove('shake');
   void botContainer.offsetWidth;
   botContainer.classList.add('shake');
@@ -389,16 +415,13 @@ function handleBotClick() {
     botContainer.classList.remove('shake');
   }, 300);
   
-  // Если это первый клик (только что скрыли заставку)
   if (botFirstClick) {
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
     
-    // Проверяем, не является ли текущая опция 4
     const currentOption = botOption.src;
     if (currentOption.includes('bot (4).jpg')) {
-      // Если опция 4, показываем кристалл 9
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true;
@@ -409,10 +432,8 @@ function handleBotClick() {
     return;
   }
   
-  // Если ожидается показ кристалла (опция 4 без смены)
   if (showCrystalOnNextClick) {
     if (botCrystals.length > 0) {
-      // Выбираем случайный кристалл (не 9, т.к. 9 исключён из массива)
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
       botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
@@ -421,7 +442,6 @@ function handleBotClick() {
     return;
   }
   
-  // Обычный клик: меняем и кристалл, и опцию случайно
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
@@ -430,7 +450,6 @@ function handleBotClick() {
     botCrystal.style.display = 'block';
     
     if (randomOption.includes('bot (4).jpg')) {
-      // Если выпала опция 4, ставим кристалл 9 и устанавливаем флаг
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = true;
@@ -605,14 +624,12 @@ function showBot() {
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
   
-  // Сбрасываем состояние перед загрузкой
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   botFirstClick = true;
   showCrystalOnNextClick = false;
   
-  // Загружаем массивы
   loadBotCrystals();
 }
 
