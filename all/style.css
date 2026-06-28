@@ -40,7 +40,7 @@ body {
   }
 }
 
-/* Рамки — сдвиг по вертикали и расширение на 2px для закрытия зазоров */
+/* Рамки */
 #frameTop,
 #frameDown {
   position: fixed;
@@ -200,7 +200,7 @@ body {
   pointer-events: none;
 }
 
-/* ===== ГАЛЕРЕЯ ===== */
+/* ===== ГАЛЕРЕЯ (убраны внутренние отступы) ===== */
 .gallery-container {
   width: 100%;
   padding: 0;
@@ -224,7 +224,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  padding: 0 10px;
+  padding: 0;
   margin-bottom: 10px;
   background-color: #ffffff;
 }
