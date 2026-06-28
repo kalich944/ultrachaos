@@ -40,34 +40,34 @@ body {
   }
 }
 
-/* Рамки — смещены для компенсации добавленных чёрных полей */
+/* Рамки — сдвиг по вертикали и расширение на 2px для закрытия зазоров */
 #frameTop,
 #frameDown {
   position: fixed;
   left: 50%;
   z-index: 1001;
   pointer-events: none;
-  width: 100%;
+  width: calc(100% + 2px);
   height: auto;
   box-sizing: border-box;
 }
 
 #frameTop {
   top: 0;
-  transform: translateX(-50%) translateY(-95px); /* сдвиг вниз */
+  transform: translateX(-50%) translateY(-95px);
 }
 
 #frameDown {
   bottom: 0;
-  transform: translateX(-50%) translateY(95px); /* сдвиг вверх */
+  transform: translateX(-50%) translateY(95px);
 }
 
 @media screen and (min-width: 768px) {
   #frameTop,
   #frameDown {
-    width: 33.33%;
-    min-width: 300px;
-    max-width: 500px;
+    width: calc(33.33% + 2px);
+    min-width: calc(300px + 2px);
+    max-width: calc(500px + 2px);
   }
   #frameTop {
     transform: translateX(-50%) translateY(-95px);
