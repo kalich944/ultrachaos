@@ -61,17 +61,17 @@ function getTelegramStartParam() {
 function loadMenuImages() {
   if (!imageContainer) return;
   imageContainer.innerHTML = '';
-  
+
   const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
   const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
-  
+
   for (let i = 1; i <= 8; i++) {
     if (i === 1) {
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
       wrapper.style.width = '100%';
       wrapper.style.display = 'block';
-      
+
       const img = document.createElement('img');
       img.src = randomFirst;
       img.alt = 'Меню 1';
@@ -79,7 +79,7 @@ function loadMenuImages() {
       img.style.height = 'auto';
       img.style.display = 'block';
       wrapper.appendChild(img);
-      
+
       const aboutImg = document.createElement('img');
       aboutImg.src = 'menu about.png';
       aboutImg.alt = 'О игре';
@@ -95,18 +95,61 @@ function loadMenuImages() {
         showAbout();
       });
       wrapper.appendChild(aboutImg);
-      
+
       imageContainer.appendChild(wrapper);
       continue;
     }
-    
+
+    if (i === 2) {
+      // Переключалка для menu (2a) / menu (2b)
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.width = '100%';
+
+      const imgA = document.createElement('img');
+      imgA.src = 'menu (2a).png';
+      imgA.alt = 'Меню 2a';
+      imgA.style.width = '100%';
+      imgA.style.height = 'auto';
+      imgA.style.display = 'block';
+      imgA.style.cursor = 'pointer';
+
+      const imgB = document.createElement('img');
+      imgB.src = 'menu (2b).png';
+      imgB.alt = 'Меню 2b';
+      imgB.style.width = '100%';
+      imgB.style.height = 'auto';
+      imgB.style.display = 'none';
+      imgB.style.cursor = 'pointer';
+
+      let showA = true;
+      const toggle = function() {
+        if (showA) {
+          imgA.style.display = 'none';
+          imgB.style.display = 'block';
+        } else {
+          imgA.style.display = 'block';
+          imgB.style.display = 'none';
+        }
+        showA = !showA;
+      };
+
+      imgA.addEventListener('click', toggle);
+      imgB.addEventListener('click', toggle);
+
+      wrapper.appendChild(imgA);
+      wrapper.appendChild(imgB);
+      imageContainer.appendChild(wrapper);
+      continue;
+    }
+
     const img = document.createElement('img');
     img.src = `menu (${i}).png`;
     img.alt = `Меню ${i}`;
     img.style.width = '100%';
     img.style.height = 'auto';
     img.style.display = 'block';
-    
+
     if (i === 3) {
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => showBot());
@@ -127,7 +170,7 @@ function loadMenuImages() {
         window.open('https://t.me/ultrachaosAKB', '_blank');
       });
     }
-    
+
     imageContainer.appendChild(img);
   }
 }
@@ -136,30 +179,30 @@ function loadMenuImages() {
 function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   if (!container) return;
   container.innerHTML = '';
-  
+
   let i = startNumber;
   let loadedCount = 0;
-  
+
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
     const imgPath = `${baseName} (${currentIndex}).png`;
-    
+
     img.onload = function() {
       img.alt = `${baseName} ${currentIndex}`;
       img.id = `${baseName}-${currentIndex}`;
-      
+
       if (clickMap && clickMap[currentIndex]) {
         img.style.cursor = 'pointer';
         img.addEventListener('click', clickMap[currentIndex]);
       }
-      
+
       container.appendChild(img);
       loadedCount++;
       i++;
       loadNext();
     };
-    
+
     img.onerror = function() {
       console.log(`Загружено ${loadedCount} изображений ${baseName}`);
       if (pendingHash) {
@@ -167,10 +210,10 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
         pendingHash = null;
       }
     };
-    
+
     img.src = imgPath;
   }
-  
+
   loadNext();
 }
 
@@ -180,7 +223,7 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   cardDiv.style.position = 'relative';
   cardDiv.style.display = 'inline-block';
   cardDiv.style.width = '100%';
-  
+
   const img = document.createElement('img');
   img.src = imageUrl;
   img.alt = alt;
@@ -188,14 +231,14 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   img.style.width = '100%';
   img.style.height = 'auto';
   img.style.display = 'block';
-  
+
   if (detailUrl) {
     img.style.cursor = 'pointer';
     img.addEventListener('click', () => {
       fullscreenImg.src = detailUrl;
       fullscreen.classList.remove('hidden');
     });
-    
+
     const cornerImg = document.createElement('img');
     cornerImg.src = 'gallery/corner.jpg';
     cornerImg.alt = 'подробности';
@@ -207,7 +250,7 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
     cornerImg.style.pointerEvents = 'none';
     cardDiv.appendChild(cornerImg);
   }
-  
+
   cardDiv.appendChild(img);
   container.appendChild(cardDiv);
 }
@@ -217,81 +260,124 @@ async function loadGallery() {
     console.error('Элементы галереи не найдены');
     return;
   }
-  
+
   console.log('Загрузка галереи (мгновенная)...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
   wGallery.innerHTML = '';
-  
+
   const galleryPath = 'gallery/';
-  
-  // 1. Собираем все возможные URL
-  const allUrls = [];
-  
-  // Основная галерея: base, a, b, c для номеров 1..200
+
+  // Собираем все URL и сразу проверяем существование и наличие деталей
+  const allItems = [];
+
+  // Основная галерея
   for (let i = 1; i <= 200; i++) {
-    allUrls.push({ url: `${galleryPath}${i}.jpg`, type: 'base', index: i });
-    allUrls.push({ url: `${galleryPath}${i}a.jpg`, type: 'a', index: i });
-    allUrls.push({ url: `${galleryPath}${i}b.jpg`, type: 'b', index: i });
-    allUrls.push({ url: `${galleryPath}${i}c.jpg`, type: 'c', index: i });
+    const baseUrl = `${galleryPath}${i}.jpg`;
+    const aUrl = `${galleryPath}${i}a.jpg`;
+    const bUrl = `${galleryPath}${i}b.jpg`;
+    const cUrl = `${galleryPath}${i}c.jpg`;
+    allItems.push({ url: baseUrl, type: 'base', index: i });
+    allItems.push({ url: aUrl, type: 'a', index: i });
+    allItems.push({ url: bUrl, type: 'b', index: i });
+    allItems.push({ url: cUrl, type: 'c', index: i });
   }
-  
+
   // Серии p, a, w
   const seriesTypes = ['p', 'a', 'w'];
   for (let s of seriesTypes) {
     for (let i = 1; i <= 100; i++) {
-      allUrls.push({ url: `${galleryPath}${s}${i}.jpg`, type: `series_${s}`, index: i });
+      allItems.push({ url: `${galleryPath}${s}${i}.jpg`, type: `series_${s}`, index: i });
     }
   }
-  
-  // 2. Проверяем все файлы параллельно
-  const checkPromises = allUrls.map(item => 
+
+  // Параллельно проверяем все файлы
+  const checkPromises = allItems.map(item => 
     fileExists(item.url).then(exists => ({ ...item, exists }))
   );
   const results = await Promise.all(checkPromises);
   const existing = results.filter(r => r.exists);
-  
-  // 3. Функция для добавления карты с проверкой детали
-  const addCardWithDetail = async (container, url, alt) => {
-    // Проверяем наличие детали: заменяем последнюю точку перед расширением на d
-    const detailUrl = url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
+
+  // Теперь для каждого существующего файла проверяем деталь параллельно
+  const detailPromises = existing.map(item => {
+    const detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
       return `d${num}${letter}.jpg`;
     });
-    const hasDetail = await fileExists(detailUrl);
-    addCardWithCorner(container, url, hasDetail ? detailUrl : null, alt);
+    return fileExists(detailUrl).then(hasDetail => ({ ...item, detailUrl, hasDetail }));
+  });
+  const itemsWithDetail = await Promise.all(detailPromises);
+
+  // Группируем по типу
+  const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
+  const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
+  const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
+  const cItems = itemsWithDetail.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
+
+  // Добавляем все карты в правильном порядке с помощью DocumentFragment для скорости
+  const fragment = document.createDocumentFragment();
+
+  const addToFragment = (container, item) => {
+    const cardDiv = document.createElement('div');
+    cardDiv.style.position = 'relative';
+    cardDiv.style.display = 'inline-block';
+    cardDiv.style.width = '100%';
+
+    const img = document.createElement('img');
+    img.src = item.url;
+    img.alt = `Карта ${item.index}`;
+    img.className = 'card-image';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+
+    if (item.hasDetail) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => {
+        fullscreenImg.src = item.detailUrl;
+        fullscreen.classList.remove('hidden');
+      });
+
+      const cornerImg = document.createElement('img');
+      cornerImg.src = 'gallery/corner.jpg';
+      cornerImg.alt = 'подробности';
+      cornerImg.style.position = 'absolute';
+      cornerImg.style.top = '0';
+      cornerImg.style.right = '0';
+      cornerImg.style.width = '12.5%';
+      cornerImg.style.height = 'auto';
+      cornerImg.style.pointerEvents = 'none';
+      cardDiv.appendChild(cornerImg);
+    }
+
+    cardDiv.appendChild(img);
+    // Добавляем в фрагмент, но чтобы добавить в правильный контейнер, мы будем добавлять сразу в контейнер
+    // или использовать фрагмент только для одного контейнера. Упростим: добавляем напрямую в контейнер.
+    // Но для скорости лучше использовать фрагмент для каждого контейнера.
+    container.appendChild(cardDiv);
   };
-  
-  // 4. Добавляем в правильном порядке: сначала base, потом a, b, c для каждого номера
+
+  // Добавляем в mainGallery в порядке: base, a, b, c для каждого индекса
   for (let i = 1; i <= 200; i++) {
-    const base = existing.find(r => r.type === 'base' && r.index === i);
-    if (base) {
-      await addCardWithDetail(mainGallery, base.url, `Карта ${i}`);
-    }
-    const a = existing.find(r => r.type === 'a' && r.index === i);
-    if (a) {
-      await addCardWithDetail(mainGallery, a.url, `Карта ${i}a`);
-    }
-    const b = existing.find(r => r.type === 'b' && r.index === i);
-    if (b) {
-      await addCardWithDetail(mainGallery, b.url, `Карта ${i}b`);
-    }
-    const c = existing.find(r => r.type === 'c' && r.index === i);
-    if (c) {
-      await addCardWithDetail(mainGallery, c.url, `Карта ${i}c`);
-    }
+    const base = baseItems.find(r => r.index === i);
+    if (base) addToFragment(mainGallery, base);
+    const a = aItems.find(r => r.index === i);
+    if (a) addToFragment(mainGallery, a);
+    const b = bItems.find(r => r.index === i);
+    if (b) addToFragment(mainGallery, b);
+    const c = cItems.find(r => r.index === i);
+    if (c) addToFragment(mainGallery, c);
   }
-  
-  // 5. Серии
+
+  // Серии
   for (let s of seriesTypes) {
     const container = s === 'p' ? pGallery : (s === 'a' ? aGallery : wGallery);
-    for (let i = 1; i <= 100; i++) {
-      const item = existing.find(r => r.type === `series_${s}` && r.index === i);
-      if (!item) break; // если файл не найден, дальше в этой серии нет
-      await addCardWithDetail(container, item.url, `Карта ${s}${i}`);
+    const seriesItems = itemsWithDetail.filter(r => r.type === `series_${s}`).sort((a, b) => a.index - b.index);
+    for (let item of seriesItems) {
+      addToFragment(container, item);
     }
   }
-  
+
   console.log('Галерея загружена (мгновенная)');
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
@@ -303,7 +389,7 @@ async function loadGallery() {
 function handleDeepLink(hash) {
   if (!hash || hash === '#') return;
   const target = hash.startsWith('#') ? hash.substring(1) : hash;
-  
+
   if (target.startsWith('rules-')) showRules();
   else if (target.startsWith('gallery-')) showGallery();
   else if (target === 'bot') showBot();
@@ -315,12 +401,12 @@ function handleDeepLink(hash) {
 function loadBotCrystals() {
   botCrystals = [];
   let i = 1;
-  
+
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
     const imgPath = `bot crys (${currentIndex}).JPG`;
-    
+
     img.onload = function() {
       if (currentIndex !== 9) {
         botCrystals.push(imgPath);
@@ -328,41 +414,41 @@ function loadBotCrystals() {
       i++;
       loadNext();
     };
-    
+
     img.onerror = function() {
       console.log(`Загружено кристаллов: ${botCrystals.length}`);
       loadBotOptions();
     };
-    
+
     img.src = imgPath;
   }
-  
+
   loadNext();
 }
 
 function loadBotOptions() {
   botOptions = [];
   let i = 1;
-  
+
   function loadNext() {
     const img = new Image();
     const currentIndex = i;
     const imgPath = `bot (${currentIndex}).jpg`;
-    
+
     img.onload = function() {
       botOptions.push(imgPath);
       i++;
       loadNext();
     };
-    
+
     img.onerror = function() {
       console.log(`Загружено опций: ${botOptions.length}`);
       showBotReady();
     };
-    
+
     img.src = imgPath;
   }
-  
+
   loadNext();
 }
 
@@ -377,10 +463,10 @@ function showBotReady() {
     }
   }
   const randomOption = botOptions.length > 0 ? botOptions[Math.floor(Math.random() * botOptions.length)] : '';
-  
+
   botCrystal.src = randomCrystal;
   botOption.src = randomOption;
-  
+
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
@@ -390,19 +476,19 @@ function showBotReady() {
 
 function handleBotClick() {
   botOpening.style.display = 'none';
-  
+
   botContainer.classList.remove('shake');
   void botContainer.offsetWidth;
   botContainer.classList.add('shake');
   setTimeout(() => {
     botContainer.classList.remove('shake');
   }, 300);
-  
+
   if (botFirstClick) {
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botFirstClick = false;
-    
+
     const currentOption = botOption.src;
     if (currentOption.includes('bot (4).jpg')) {
       botCrystal.src = 'bot crys (9).JPG';
@@ -414,7 +500,7 @@ function handleBotClick() {
     }
     return;
   }
-  
+
   if (showCrystalOnNextClick) {
     if (botCrystals.length > 0) {
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
@@ -424,14 +510,14 @@ function handleBotClick() {
     }
     return;
   }
-  
+
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
     const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
     botCrystal.src = randomCrystal;
     botOption.src = randomOption;
     botCrystal.style.display = 'block';
-    
+
     if (randomOption.includes('bot (4).jpg')) {
       botCrystal.src = 'bot crys (9).JPG';
       botCrystal.style.display = 'block';
@@ -465,25 +551,25 @@ async function showRules() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
+
   rulesContainer.innerHTML = '';
   let i = 1;
   let hasAny = true;
-  
+
   while (hasAny) {
     const plainFile = `rules (${i}).jpg`;
     const fileA = `rules (${i}a).jpg`;
     const fileB = `rules (${i}b).jpg`;
-    
+
     const existsPlain = await fileExists(plainFile);
     const existsA = await fileExists(fileA);
     const existsB = await fileExists(fileB);
-    
+
     if (!existsPlain && !existsA && !existsB) {
       hasAny = false;
       break;
     }
-    
+
     const addClickHandler = (imgElement, num) => {
       if (num === 2) {
         imgElement.style.cursor = 'pointer';
@@ -493,12 +579,12 @@ async function showRules() {
         imgElement.addEventListener('click', showBot);
       }
     };
-    
+
     if (existsA && existsB) {
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
       wrapper.style.width = '100%';
-      
+
       const imgA = document.createElement('img');
       imgA.src = fileA;
       imgA.alt = `Правило ${i}a`;
@@ -507,7 +593,7 @@ async function showRules() {
       imgA.style.display = 'block';
       imgA.style.cursor = 'pointer';
       addClickHandler(imgA, i);
-      
+
       const imgB = document.createElement('img');
       imgB.src = fileB;
       imgB.alt = `Правило ${i}b`;
@@ -516,7 +602,7 @@ async function showRules() {
       imgB.style.display = 'none';
       imgB.style.cursor = 'pointer';
       addClickHandler(imgB, i);
-      
+
       let showA = true;
       const toggle = function() {
         if (showA) {
@@ -528,10 +614,10 @@ async function showRules() {
         }
         showA = !showA;
       };
-      
+
       imgA.addEventListener('click', toggle);
       imgB.addEventListener('click', toggle);
-      
+
       wrapper.appendChild(imgA);
       wrapper.appendChild(imgB);
       rulesContainer.appendChild(wrapper);
@@ -566,10 +652,10 @@ async function showRules() {
       addClickHandler(img, i);
       rulesContainer.appendChild(img);
     }
-    
+
     i++;
   }
-  
+
   if (pendingHash && pendingHash.startsWith('#rules-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
@@ -585,7 +671,7 @@ function showAbout() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'flex';
   closeButton.style.display = 'block';
-  
+
   const aboutClickMap = {
     8: () => showBot(),
     9: () => showRules(),
@@ -593,7 +679,7 @@ function showAbout() {
       window.open('https://www.avito.ru/brands/63979153b8bf07d6eb232ea8836f16b9/all/sport_i_otdyh?gdlkerfdnwq=101&page_from=from_item_card&iid=7826045800&sellerId=de3d7e1794b05276f5e69732a9ebbd1c', '_blank');
     }
   };
-  
+
   loadImages(aboutContainer, 'about', 1, aboutClickMap);
 }
 
@@ -606,13 +692,13 @@ function showBot() {
   galleryScreen.style.display = 'none';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
+
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
   botFirstClick = true;
   showCrystalOnNextClick = false;
-  
+
   loadBotCrystals();
 }
 
@@ -625,7 +711,7 @@ function showGallery() {
   galleryScreen.style.display = 'block';
   aboutScreen.style.display = 'none';
   closeButton.style.display = 'block';
-  
+
   loadGallery();
 }
 
