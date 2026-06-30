@@ -62,7 +62,7 @@ function loadMenuImages() {
   if (!imageContainer) return;
   imageContainer.innerHTML = '';
 
-  const firstVariants = ['menu (1a).png', 'menu (1b).png', 'menu (1c).png'];
+  const firstVariants = ['menu (1a).jpg', 'menu (1b).jpg', 'menu (1c).jpg'];
   const randomFirst = firstVariants[Math.floor(Math.random() * firstVariants.length)];
 
   for (let i = 1; i <= 8; i++) {
@@ -101,13 +101,12 @@ function loadMenuImages() {
     }
 
     if (i === 2) {
-      // Переключалка для menu (2a) / menu (2b)
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
       wrapper.style.width = '100%';
 
       const imgA = document.createElement('img');
-      imgA.src = 'menu (2a).png';
+      imgA.src = 'menu (2a).jpg';
       imgA.alt = 'Меню 2a';
       imgA.style.width = '100%';
       imgA.style.height = 'auto';
@@ -115,7 +114,7 @@ function loadMenuImages() {
       imgA.style.cursor = 'pointer';
 
       const imgB = document.createElement('img');
-      imgB.src = 'menu (2b).png';
+      imgB.src = 'menu (2b).jpg';
       imgB.alt = 'Меню 2b';
       imgB.style.width = '100%';
       imgB.style.height = 'auto';
@@ -144,7 +143,7 @@ function loadMenuImages() {
     }
 
     const img = document.createElement('img');
-    img.src = `menu (${i}).png`;
+    img.src = `menu (${i}).jpg`;
     img.alt = `Меню ${i}`;
     img.style.width = '100%';
     img.style.height = 'auto';
@@ -351,9 +350,6 @@ async function loadGallery() {
     }
 
     cardDiv.appendChild(img);
-    // Добавляем в фрагмент, но чтобы добавить в правильный контейнер, мы будем добавлять сразу в контейнер
-    // или использовать фрагмент только для одного контейнера. Упростим: добавляем напрямую в контейнер.
-    // Но для скорости лучше использовать фрагмент для каждого контейнера.
     container.appendChild(cardDiv);
   };
 
