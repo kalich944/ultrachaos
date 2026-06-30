@@ -117,17 +117,26 @@ body {
   align-items: center;
 }
 
-#imageContainer, #rulesContainer, #aboutContainer {
+/* Меню, правила, about – устраняем зазоры между изображениями */
+#imageContainer,
+#rulesContainer,
+#aboutContainer {
   padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   background-color: #000000;
+  line-height: 0;
+  font-size: 0;
+  gap: 0;
 }
 
-#imageContainer img, #rulesContainer img, #aboutContainer img {
+#imageContainer img,
+#rulesContainer img,
+#aboutContainer img {
   width: 100%;
   height: auto;
   display: block;
@@ -135,6 +144,13 @@ body {
   margin: 0;
   padding: 0;
   vertical-align: bottom;
+}
+
+/* Обёртка для переключаемых изображений (menu 2a/2b, rules a/b) тоже без зазоров */
+#imageContainer > div,
+#rulesContainer > div {
+  line-height: 0;
+  font-size: 0;
 }
 
 /* Бот */
@@ -200,7 +216,7 @@ body {
   pointer-events: none;
 }
 
-/* ===== ГАЛЕРЕЯ (убраны внутренние отступы) ===== */
+/* ===== ГАЛЕРЕЯ ===== */
 .gallery-container {
   width: 100%;
   padding: 0;
