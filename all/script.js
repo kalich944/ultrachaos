@@ -174,7 +174,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (быстрая, с параллельной проверкой для каждого номера) ==========
+// ========== ГАЛЕРЕЯ (МГНОВЕННАЯ, ПОЛНОСТЬЮ ПАРАЛЛЕЛЬНАЯ) ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -218,7 +218,7 @@ async function loadGallery() {
     return;
   }
   
-  console.log('Загрузка галереи (быстрая)...');
+  console.log('Загрузка галереи (мгновенная)...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
@@ -226,59 +226,73 @@ async function loadGallery() {
   
   const galleryPath = 'gallery/';
   
-  // Основная галерея
+  // 1. Собираем все возможные URL
+  const allUrls = [];
+  
+  // Основная галерея: base, a, b, c для номеров 1..200
   for (let i = 1; i <= 200; i++) {
-    const baseUrl = `${galleryPath}${i}.jpg`;
-    const aUrl = `${galleryPath}${i}a.jpg`;
-    const bUrl = `${galleryPath}${i}b.jpg`;
-    const cUrl = `${galleryPath}${i}c.jpg`;
-    
-    // Проверяем все варианты параллельно для этого номера
-    const [hasBase, hasA, hasB, hasC] = await Promise.all([
-      fileExists(baseUrl),
-      fileExists(aUrl),
-      fileExists(bUrl),
-      fileExists(cUrl)
-    ]);
-    
-    if (!hasBase && !hasA && !hasB && !hasC) continue;
-    
-    // Добавляем base, если есть
-    if (hasBase) {
-      const detailUrl = `${galleryPath}d${i}.jpg`;
-      const hasDetail = await fileExists(detailUrl);
-      addCardWithCorner(mainGallery, baseUrl, hasDetail ? detailUrl : null, `Карта ${i}`);
-    }
-    
-    // Добавляем a, b, c, если есть
-    for (let [url, letter] of [[aUrl, 'a'], [bUrl, 'b'], [cUrl, 'c']]) {
-      if (await fileExists(url)) {
-        const detailUrl = `${galleryPath}d${i}${letter}.jpg`;
-        const hasDetail = await fileExists(detailUrl);
-        addCardWithCorner(mainGallery, url, hasDetail ? detailUrl : null, `Карта ${i}${letter}`);
-      }
-    }
+    allUrls.push({ url: `${galleryPath}${i}.jpg`, type: 'base', index: i });
+    allUrls.push({ url: `${galleryPath}${i}a.jpg`, type: 'a', index: i });
+    allUrls.push({ url: `${galleryPath}${i}b.jpg`, type: 'b', index: i });
+    allUrls.push({ url: `${galleryPath}${i}c.jpg`, type: 'c', index: i });
   }
   
   // Серии p, a, w
-  const series = [
-    { prefix: 'p', gallery: pGallery, max: 100 },
-    { prefix: 'a', gallery: aGallery, max: 100 },
-    { prefix: 'w', gallery: wGallery, max: 100 }
-  ];
-  
-  for (let s of series) {
-    for (let i = 1; i <= s.max; i++) {
-      const url = `${galleryPath}${s.prefix}${i}.jpg`;
-      const exists = await fileExists(url);
-      if (!exists) break; // если нет, дальше не идём
-      const detailUrl = `${galleryPath}d${s.prefix}${i}.jpg`;
-      const hasDetail = await fileExists(detailUrl);
-      addCardWithCorner(s.gallery, url, hasDetail ? detailUrl : null, `Карта ${s.prefix}${i}`);
+  const seriesTypes = ['p', 'a', 'w'];
+  for (let s of seriesTypes) {
+    for (let i = 1; i <= 100; i++) {
+      allUrls.push({ url: `${galleryPath}${s}${i}.jpg`, type: `series_${s}`, index: i });
     }
   }
   
-  console.log('Галерея загружена (быстрая)');
+  // 2. Проверяем все файлы параллельно
+  const checkPromises = allUrls.map(item => 
+    fileExists(item.url).then(exists => ({ ...item, exists }))
+  );
+  const results = await Promise.all(checkPromises);
+  const existing = results.filter(r => r.exists);
+  
+  // 3. Функция для добавления карты с проверкой детали
+  const addCardWithDetail = async (container, url, alt) => {
+    // Проверяем наличие детали: заменяем последнюю точку перед расширением на d
+    const detailUrl = url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
+      return `d${num}${letter}.jpg`;
+    });
+    const hasDetail = await fileExists(detailUrl);
+    addCardWithCorner(container, url, hasDetail ? detailUrl : null, alt);
+  };
+  
+  // 4. Добавляем в правильном порядке: сначала base, потом a, b, c для каждого номера
+  for (let i = 1; i <= 200; i++) {
+    const base = existing.find(r => r.type === 'base' && r.index === i);
+    if (base) {
+      await addCardWithDetail(mainGallery, base.url, `Карта ${i}`);
+    }
+    const a = existing.find(r => r.type === 'a' && r.index === i);
+    if (a) {
+      await addCardWithDetail(mainGallery, a.url, `Карта ${i}a`);
+    }
+    const b = existing.find(r => r.type === 'b' && r.index === i);
+    if (b) {
+      await addCardWithDetail(mainGallery, b.url, `Карта ${i}b`);
+    }
+    const c = existing.find(r => r.type === 'c' && r.index === i);
+    if (c) {
+      await addCardWithDetail(mainGallery, c.url, `Карта ${i}c`);
+    }
+  }
+  
+  // 5. Серии
+  for (let s of seriesTypes) {
+    const container = s === 'p' ? pGallery : (s === 'a' ? aGallery : wGallery);
+    for (let i = 1; i <= 100; i++) {
+      const item = existing.find(r => r.type === `series_${s}` && r.index === i);
+      if (!item) break; // если файл не найден, дальше в этой серии нет
+      await addCardWithDetail(container, item.url, `Карта ${s}${i}`);
+    }
+  }
+  
+  console.log('Галерея загружена (мгновенная)');
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
