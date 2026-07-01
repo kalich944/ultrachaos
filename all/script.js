@@ -462,6 +462,8 @@ function showBotReady() {
   isBattleModeActive = false;
   battleToggle.src = 'battle1.png';
   botInitialized = false;
+  // Убираем класс battle-mode, если был
+  botCrystal.classList.remove('battle-mode');
 }
 
 function handleBotClick() {
@@ -528,24 +530,22 @@ function handleBotClick() {
   }
 }
 
-// Переключение режимов боя с анимацией нажатия
+// Переключение режимов боя (без анимации)
 battleToggle.addEventListener('click', function(e) {
   e.stopPropagation();
   
-  // Анимация нажатия
-  this.classList.add('pressed');
-  setTimeout(() => {
-    this.classList.remove('pressed');
-  }, 150);
-  
   if (isBattleModeActive) {
+    // Возвращаем обычный режим
     this.src = 'battle1.png';
     botOption.style.display = 'block';
     isBattleModeActive = false;
+    botCrystal.classList.remove('battle-mode');
   } else {
+    // Включаем режим боя
     this.src = 'battle2.png';
     botOption.style.display = 'none';
     isBattleModeActive = true;
+    botCrystal.classList.add('battle-mode');
   }
 });
 
@@ -721,6 +721,7 @@ function showBot() {
   isBattleModeActive = false;
   battleToggle.src = 'battle1.png';
   botInitialized = false;
+  botCrystal.classList.remove('battle-mode');
 
   loadBotCrystals();
 }
