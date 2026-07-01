@@ -219,7 +219,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ ==========
+// ========== ГАЛЕРЕЯ (с поддержкой w (номер).png) ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -272,6 +272,7 @@ async function loadGallery() {
   const galleryPath = 'gallery/';
 
   const allItems = [];
+  // Основная галерея
   for (let i = 1; i <= 200; i++) {
     const baseUrl = `${galleryPath}${i}.jpg`;
     const aUrl = `${galleryPath}${i}a.jpg`;
@@ -283,27 +284,49 @@ async function loadGallery() {
     allItems.push({ url: cUrl, type: 'c', index: i });
   }
 
-  const seriesTypes = ['p', 'a', 'w'];
-  for (let s of seriesTypes) {
-    for (let i = 1; i <= 100; i++) {
-      allItems.push({ url: `${galleryPath}${s}${i}.jpg`, type: `series_${s}`, index: i });
+  // Серии p, a, w – для w используем новый формат с пробелом
+  const seriesConfigs = [
+    { prefix: 'p', gallery: pGallery, max: 100, format: 'jpg' },
+    { prefix: 'a', gallery: aGallery, max: 100, format: 'jpg' },
+    { prefix: 'w', gallery: wGallery, max: 100, format: 'png', spaced: true } // spaced: true означает пробел перед номером
+  ];
+
+  for (let s of seriesConfigs) {
+    for (let i = 1; i <= s.max; i++) {
+      let url;
+      if (s.spaced) {
+        url = `${galleryPath}${s.prefix} (${i}).${s.format}`; // например w (1).png
+      } else {
+        url = `${galleryPath}${s.prefix}${i}.${s.format}`; // p1.jpg, a1.jpg
+      }
+      allItems.push({ url, type: `series_${s.prefix}`, index: i });
     }
   }
 
+  // Проверяем все файлы параллельно
   const checkPromises = allItems.map(item => 
     fileExists(item.url).then(exists => ({ ...item, exists }))
   );
   const results = await Promise.all(checkPromises);
   const existing = results.filter(r => r.exists);
 
+  // Для каждого существующего файла проверяем деталь
   const detailPromises = existing.map(item => {
-    const detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
-      return `d${num}${letter}.jpg`;
-    });
+    let detailUrl;
+    if (item.type === 'series_w') {
+      // Для w деталь: dw (номер).png
+      detailUrl = item.url.replace(/w \((\d+)\)\.png$/, (match, num) => `dw (${num}).png`);
+    } else {
+      // Для остальных: d...jpg
+      detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
+        return `d${num}${letter}.jpg`;
+      });
+    }
     return fileExists(detailUrl).then(hasDetail => ({ ...item, detailUrl, hasDetail }));
   });
   const itemsWithDetail = await Promise.all(detailPromises);
 
+  // Функция добавления в контейнер
   const addToContainer = (container, item) => {
     const cardDiv = document.createElement('div');
     cardDiv.style.position = 'relative';
@@ -341,6 +364,7 @@ async function loadGallery() {
     container.appendChild(cardDiv);
   };
 
+  // Добавляем основную галерею в порядке: base, a, b, c для каждого индекса
   const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
   const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
   const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
@@ -357,9 +381,11 @@ async function loadGallery() {
     if (c) addToContainer(mainGallery, c);
   }
 
-  for (let s of seriesTypes) {
-    const container = s === 'p' ? pGallery : (s === 'a' ? aGallery : wGallery);
-    const seriesItems = itemsWithDetail.filter(r => r.type === `series_${s}`).sort((a, b) => a.index - b.index);
+  // Добавляем серии
+  for (let s of seriesConfigs) {
+    const container = s.gallery;
+    const type = `series_${s.prefix}`;
+    const seriesItems = itemsWithDetail.filter(r => r.type === type).sort((a, b) => a.index - b.index);
     for (let item of seriesItems) {
       addToContainer(container, item);
     }
@@ -462,7 +488,6 @@ function showBotReady() {
   isBattleModeActive = false;
   battleToggle.src = 'battle1.png';
   botInitialized = false;
-  // Убираем класс battle-mode, если был
   botCrystal.classList.remove('battle-mode');
 }
 
@@ -530,18 +555,16 @@ function handleBotClick() {
   }
 }
 
-// Переключение режимов боя (без анимации)
+// Переключение режимов боя
 battleToggle.addEventListener('click', function(e) {
   e.stopPropagation();
   
   if (isBattleModeActive) {
-    // Возвращаем обычный режим
     this.src = 'battle1.png';
     botOption.style.display = 'block';
     isBattleModeActive = false;
     botCrystal.classList.remove('battle-mode');
   } else {
-    // Включаем режим боя
     this.src = 'battle2.png';
     botOption.style.display = 'none';
     isBattleModeActive = true;
