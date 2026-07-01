@@ -178,6 +178,7 @@ body {
   touch-action: none;
 }
 
+/* bot-open теперь поверх переключателя (z-index выше battleToggle) */
 #bot-opening {
   position: absolute;
   width: 100%;
@@ -185,7 +186,7 @@ body {
   top: 0;
   left: 0;
   object-fit: contain;
-  z-index: 2;
+  z-index: 1004; /* выше battleToggle */
   pointer-events: none;
 }
 
@@ -215,17 +216,22 @@ body {
   pointer-events: none;
 }
 
-/* Переключатель режимов боя — в самом углу, уменьшен на 30% */
+/* Переключатель режимов боя — в углу, с анимацией нажатия */
 #battleToggle {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 12.6%; /* 18% * 0.7 */
+  width: 12.6%;
   height: auto;
   z-index: 1003;
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
+  transition: transform 0.15s ease;
+}
+
+#battleToggle.pressed {
+  transform: scale(0.85);
 }
 
 /* ===== ГАЛЕРЕЯ ===== */
