@@ -178,7 +178,7 @@ body {
   touch-action: none;
 }
 
-/* bot-open теперь поверх переключателя (z-index выше battleToggle) */
+/* bot-open поверх переключателя */
 #bot-opening {
   position: absolute;
   width: 100%;
@@ -186,7 +186,7 @@ body {
   top: 0;
   left: 0;
   object-fit: contain;
-  z-index: 1004; /* выше battleToggle */
+  z-index: 1004;
   pointer-events: none;
 }
 
@@ -201,6 +201,13 @@ body {
   display: none;
   z-index: 3;
   pointer-events: none;
+  transition: top 0.25s ease;
+}
+
+/* Режим боя: кристалл по центру вертикально */
+#bot-crystal.battle-mode {
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 #bot-option {
@@ -216,7 +223,7 @@ body {
   pointer-events: none;
 }
 
-/* Переключатель режимов боя — в углу, с анимацией нажатия */
+/* Переключатель режимов боя — без анимации */
 #battleToggle {
   position: absolute;
   bottom: 0;
@@ -227,11 +234,6 @@ body {
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
-  transition: transform 0.15s ease;
-}
-
-#battleToggle.pressed {
-  transform: scale(0.85);
 }
 
 /* ===== ГАЛЕРЕЯ ===== */
