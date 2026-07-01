@@ -223,7 +223,7 @@ body {
   pointer-events: none;
 }
 
-/* Переключатель режимов боя — без анимации */
+/* Переключатель режимов боя */
 #battleToggle {
   position: absolute;
   bottom: 0;
@@ -256,6 +256,7 @@ body {
   margin-bottom: 10px;
 }
 
+/* Сетка для основной галереи, p и a */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -269,6 +270,34 @@ body {
   width: 100%;
   height: auto;
   cursor: pointer;
+}
+
+/* Галерея оружия – вертикальный список на всю ширину, без зазоров */
+#w-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
+}
+
+#w-gallery > div {
+  width: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+#w-gallery .card-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 /* Полноэкранный режим */
