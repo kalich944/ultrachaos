@@ -36,7 +36,7 @@ let botFirstClick = true;
 let pendingHash = null;
 let showCrystalOnNextClick = false;
 let isBattleModeActive = false;
-let botInitialized = false; // флаг, что бот уже был активирован
+let botInitialized = false;
 
 // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
 function fileExists(url) {
@@ -440,7 +440,6 @@ function loadBotOptions() {
 }
 
 function showBotReady() {
-  // Выбираем случайный кристалл (не 9)
   let randomCrystal = botCrystals[0];
   if (botCrystals.length > 0) {
     const filtered = botCrystals.filter(src => !src.includes('bot crys (9).JPG'));
@@ -450,13 +449,11 @@ function showBotReady() {
       randomCrystal = botCrystals[0];
     }
   }
-  // Выбираем случайную опцию
   const randomOption = botOptions.length > 0 ? botOptions[Math.floor(Math.random() * botOptions.length)] : '';
 
   botCrystal.src = randomCrystal;
   botOption.src = randomOption;
 
-  // Показываем заставку, скрываем остальное
   botOpening.style.display = 'block';
   botCrystal.style.display = 'none';
   botOption.style.display = 'none';
@@ -464,18 +461,16 @@ function showBotReady() {
   showCrystalOnNextClick = false;
   isBattleModeActive = false;
   battleToggle.src = 'battle1.png';
-  botInitialized = false; // бот ещё не активирован
+  botInitialized = false;
 }
 
 function handleBotClick() {
-  // Если бот ещё не активирован, скрываем заставку и показываем кристалл и опцию
   if (!botInitialized) {
     botOpening.style.display = 'none';
     botCrystal.style.display = 'block';
     botOption.style.display = 'block';
     botInitialized = true;
-    botFirstClick = false; // больше не первый клик
-    // При первом открытии проверяем, не выпала ли опция 4
+    botFirstClick = false;
     const currentOption = botOption.src;
     if (currentOption.includes('bot (4).jpg')) {
       botCrystal.src = 'bot crys (9).JPG';
@@ -485,7 +480,6 @@ function handleBotClick() {
       botCrystal.style.display = 'block';
       showCrystalOnNextClick = false;
     }
-    // Эффект дрожания
     botContainer.classList.remove('shake');
     void botContainer.offsetWidth;
     botContainer.classList.add('shake');
@@ -495,8 +489,6 @@ function handleBotClick() {
     return;
   }
 
-  // Если бот уже активирован – обычная логика
-  // Эффект дрожания
   botContainer.classList.remove('shake');
   void botContainer.offsetWidth;
   botContainer.classList.add('shake');
@@ -504,7 +496,6 @@ function handleBotClick() {
     botContainer.classList.remove('shake');
   }, 300);
 
-  // Если ожидается показ кристалла (опция 4 без смены)
   if (showCrystalOnNextClick) {
     if (botCrystals.length > 0) {
       const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
@@ -515,19 +506,14 @@ function handleBotClick() {
     return;
   }
 
-  // Обычный клик
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
-    // В обычном режиме всегда меняем и кристалл, и опцию
     if (!isBattleModeActive) {
-      // Меняем кристалл
       botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
-      // Меняем опцию
       const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
       botOption.src = randomOption;
       botOption.style.display = 'block';
-      // Проверяем, не выпала ли опция 4
       if (randomOption.includes('bot (4).jpg')) {
         botCrystal.src = 'bot crys (9).JPG';
         botCrystal.style.display = 'block';
@@ -536,24 +522,27 @@ function handleBotClick() {
         showCrystalOnNextClick = false;
       }
     } else {
-      // В режиме боя меняем только кристалл, опцию не трогаем (она скрыта)
       botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
     }
   }
 }
 
-// Переключение режимов боя
+// Переключение режимов боя с анимацией нажатия
 battleToggle.addEventListener('click', function(e) {
-  e.stopPropagation(); // чтобы клик не передавался на botContainer
+  e.stopPropagation();
+  
+  // Анимация нажатия
+  this.classList.add('pressed');
+  setTimeout(() => {
+    this.classList.remove('pressed');
+  }, 150);
   
   if (isBattleModeActive) {
-    // Возвращаем обычный режим: показываем battle1, показываем условия
     this.src = 'battle1.png';
     botOption.style.display = 'block';
     isBattleModeActive = false;
   } else {
-    // Включаем режим боя: показываем battle2, скрываем условия
     this.src = 'battle2.png';
     botOption.style.display = 'none';
     isBattleModeActive = true;
@@ -731,7 +720,7 @@ function showBot() {
   showCrystalOnNextClick = false;
   isBattleModeActive = false;
   battleToggle.src = 'battle1.png';
-  botInitialized = false; // сбрасываем флаг инициализации
+  botInitialized = false;
 
   loadBotCrystals();
 }
