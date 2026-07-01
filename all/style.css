@@ -117,7 +117,7 @@ body {
   align-items: center;
 }
 
-/* Меню, правила, about – устраняем зазоры между изображениями */
+/* Меню, правила, about – устраняем зазоры */
 #imageContainer,
 #rulesContainer,
 #aboutContainer {
@@ -146,7 +146,6 @@ body {
   vertical-align: bottom;
 }
 
-/* Обёртка для переключаемых изображений (menu 2a/2b, rules a/b) тоже без зазоров */
 #imageContainer > div,
 #rulesContainer > div {
   line-height: 0;
@@ -214,6 +213,19 @@ body {
   display: none;
   z-index: 3;
   pointer-events: none;
+}
+
+/* Переключатель режимов боя — нижний правый угол */
+#battleToggle {
+  position: absolute;
+  bottom: 8%;
+  right: 5%;
+  width: 18%;
+  height: auto;
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 /* ===== ГАЛЕРЕЯ ===== */
