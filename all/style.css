@@ -215,14 +215,14 @@ body {
   pointer-events: none;
 }
 
-/* Переключатель режимов боя — нижний правый угол, поверх всего */
+/* Переключатель режимов боя — в самом углу, уменьшен на 30% */
 #battleToggle {
   position: absolute;
-  bottom: 8%;
-  right: 5%;
-  width: 18%;
+  bottom: 0;
+  right: 0;
+  width: 12.6%; /* 18% * 0.7 */
   height: auto;
-  z-index: 1003; /* выше рамок (1001) и крестика (1002) */
+  z-index: 1003;
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
