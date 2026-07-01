@@ -18,6 +18,7 @@ const botContainer = document.getElementById('botContainer');
 const botOpening = document.getElementById('bot-opening');
 const botCrystal = document.getElementById('bot-crystal');
 const botOption = document.getElementById('bot-option');
+const battleToggle = document.getElementById('battleToggle');
 
 // Элементы галереи
 const mainGallery = document.getElementById('main-gallery');
@@ -34,6 +35,7 @@ let currentScreen = 'menu';
 let botFirstClick = true;
 let pendingHash = null;
 let showCrystalOnNextClick = false;
+let isBattleModeActive = false; // false – обычный режим (условия видны), true – скрыты условия
 
 // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
 function fileExists(url) {
@@ -216,7 +218,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (МГНОВЕННАЯ, ПОЛНОСТЬЮ ПАРАЛЛЕЛЬНАЯ) ==========
+// ========== ГАЛЕРЕЯ ==========
 function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
@@ -268,10 +270,7 @@ async function loadGallery() {
 
   const galleryPath = 'gallery/';
 
-  // Собираем все URL и сразу проверяем существование и наличие деталей
   const allItems = [];
-
-  // Основная галерея
   for (let i = 1; i <= 200; i++) {
     const baseUrl = `${galleryPath}${i}.jpg`;
     const aUrl = `${galleryPath}${i}a.jpg`;
@@ -283,7 +282,6 @@ async function loadGallery() {
     allItems.push({ url: cUrl, type: 'c', index: i });
   }
 
-  // Серии p, a, w
   const seriesTypes = ['p', 'a', 'w'];
   for (let s of seriesTypes) {
     for (let i = 1; i <= 100; i++) {
@@ -291,14 +289,12 @@ async function loadGallery() {
     }
   }
 
-  // Параллельно проверяем все файлы
   const checkPromises = allItems.map(item => 
     fileExists(item.url).then(exists => ({ ...item, exists }))
   );
   const results = await Promise.all(checkPromises);
   const existing = results.filter(r => r.exists);
 
-  // Теперь для каждого существующего файла проверяем деталь параллельно
   const detailPromises = existing.map(item => {
     const detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
       return `d${num}${letter}.jpg`;
@@ -307,16 +303,7 @@ async function loadGallery() {
   });
   const itemsWithDetail = await Promise.all(detailPromises);
 
-  // Группируем по типу
-  const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
-  const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
-  const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
-  const cItems = itemsWithDetail.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
-
-  // Добавляем все карты в правильном порядке с помощью DocumentFragment для скорости
-  const fragment = document.createDocumentFragment();
-
-  const addToFragment = (container, item) => {
+  const addToContainer = (container, item) => {
     const cardDiv = document.createElement('div');
     cardDiv.style.position = 'relative';
     cardDiv.style.display = 'inline-block';
@@ -353,24 +340,27 @@ async function loadGallery() {
     container.appendChild(cardDiv);
   };
 
-  // Добавляем в mainGallery в порядке: base, a, b, c для каждого индекса
+  const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
+  const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
+  const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
+  const cItems = itemsWithDetail.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
+
   for (let i = 1; i <= 200; i++) {
     const base = baseItems.find(r => r.index === i);
-    if (base) addToFragment(mainGallery, base);
+    if (base) addToContainer(mainGallery, base);
     const a = aItems.find(r => r.index === i);
-    if (a) addToFragment(mainGallery, a);
+    if (a) addToContainer(mainGallery, a);
     const b = bItems.find(r => r.index === i);
-    if (b) addToFragment(mainGallery, b);
+    if (b) addToContainer(mainGallery, b);
     const c = cItems.find(r => r.index === i);
-    if (c) addToFragment(mainGallery, c);
+    if (c) addToContainer(mainGallery, c);
   }
 
-  // Серии
   for (let s of seriesTypes) {
     const container = s === 'p' ? pGallery : (s === 'a' ? aGallery : wGallery);
     const seriesItems = itemsWithDetail.filter(r => r.type === `series_${s}`).sort((a, b) => a.index - b.index);
     for (let item of seriesItems) {
-      addToFragment(container, item);
+      addToContainer(container, item);
     }
   }
 
@@ -468,6 +458,10 @@ function showBotReady() {
   botOption.style.display = 'none';
   botFirstClick = true;
   showCrystalOnNextClick = false;
+  // По умолчанию режим боя выключен (условия видны)
+  isBattleModeActive = false;
+  battleToggle.src = 'battle1.png';
+  botOption.style.display = 'block'; // условия видны
 }
 
 function handleBotClick() {
@@ -509,21 +503,45 @@ function handleBotClick() {
 
   if (botCrystals.length > 0 && botOptions.length > 0) {
     const randomCrystal = botCrystals[Math.floor(Math.random() * botCrystals.length)];
-    const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
-    botCrystal.src = randomCrystal;
-    botOption.src = randomOption;
-    botCrystal.style.display = 'block';
-
-    if (randomOption.includes('bot (4).jpg')) {
-      botCrystal.src = 'bot crys (9).JPG';
-      botCrystal.style.display = 'block';
-      showCrystalOnNextClick = true;
+    // Меняем опцию только если режим боя не активен (условия видны)
+    if (!isBattleModeActive) {
+      const randomOption = botOptions[Math.floor(Math.random() * botOptions.length)];
+      botOption.src = randomOption;
+      botOption.style.display = 'block';
+      
+      if (randomOption.includes('bot (4).jpg')) {
+        botCrystal.src = 'bot crys (9).JPG';
+        botCrystal.style.display = 'block';
+        showCrystalOnNextClick = true;
+      } else {
+        botCrystal.style.display = 'block';
+        showCrystalOnNextClick = false;
+      }
     } else {
+      // В режиме боя меняем только кристалл
+      botCrystal.src = randomCrystal;
       botCrystal.style.display = 'block';
-      showCrystalOnNextClick = false;
+      // Опцию не трогаем, она скрыта
     }
   }
 }
+
+// Переключение режимов боя
+battleToggle.addEventListener('click', function(e) {
+  e.stopPropagation(); // чтобы клик не передавался на botContainer
+  
+  if (isBattleModeActive) {
+    // Возвращаем обычный режим: показываем battle1, показываем условия
+    this.src = 'battle1.png';
+    botOption.style.display = 'block';
+    isBattleModeActive = false;
+  } else {
+    // Включаем режим боя: показываем battle2, скрываем условия
+    this.src = 'battle2.png';
+    botOption.style.display = 'none';
+    isBattleModeActive = true;
+  }
+});
 
 // ========== ПОКАЗ ЭКРАНОВ ==========
 function showMenu() {
@@ -694,6 +712,8 @@ function showBot() {
   botOption.style.display = 'none';
   botFirstClick = true;
   showCrystalOnNextClick = false;
+  isBattleModeActive = false;
+  battleToggle.src = 'battle1.png';
 
   loadBotCrystals();
 }
