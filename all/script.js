@@ -222,7 +222,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (БЫСТРАЯ, ПАРАЛЛЕЛЬНАЯ, БЕЗ ДУБЛЕЙ) ==========
+// ========== ГАЛЕРЕЯ ==========
 
 function createCardElement(item) {
   const cardDiv = document.createElement('div');
@@ -238,15 +238,14 @@ function createCardElement(item) {
   img.style.height = 'auto';
   img.style.display = 'block';
 
-  // Клик по карте открывает полноэкранный режим:
-  // если есть детальная версия — показываем её, иначе — саму карту
+  // Клик по карте открывает полноэкранный режим
   img.style.cursor = 'pointer';
   img.addEventListener('click', () => {
     fullscreenImg.src = item.hasDetail ? item.detailUrl : item.url;
     fullscreen.classList.remove('hidden');
   });
 
-  // Уголок добавляем только если есть детальная версия
+  // Уголок только если есть детальная версия
   if (item.hasDetail) {
     const cornerImg = document.createElement('img');
     cornerImg.src = 'gallery/corner.jpg';
@@ -270,7 +269,6 @@ async function loadGallery() {
     return;
   }
 
-  // Токен для отмены предыдущих загрузок (защита от дублей при повторном открытии)
   const token = ++galleryLoadToken;
 
   console.log('Загрузка галереи (быстрая, параллельная)...');
@@ -280,23 +278,16 @@ async function loadGallery() {
   wGallery.innerHTML = '';
 
   const galleryPath = 'gallery/';
-
-  // Set для дедупликации URL
   const seenUrls = new Set();
 
-  // Функция обработки одной карты
   const processItem = async (url, type, index) => {
-    // Проверка токена (если галерея была перезагружена — прекращаем)
     if (token !== galleryLoadToken) return;
-
-    // Дедупликация
     if (seenUrls.has(url)) return;
     seenUrls.add(url);
 
     const exists = await fileExists(url);
     if (!exists || token !== galleryLoadToken) return;
 
-    // Определяем URL детальной версии
     let detailUrl;
     if (type === 'series_w') {
       detailUrl = url.replace(/w \((\d+)\)\.png$/, (m, num) => `dw (${num}).png`);
@@ -311,7 +302,6 @@ async function loadGallery() {
     const hasDetail = await fileExists(detailUrl);
     if (token !== galleryLoadToken) return;
 
-    // Определяем контейнер
     let container;
     if (type === 'base' || type === 'a' || type === 'b' || type === 'c') {
       container = mainGallery;
@@ -326,10 +316,8 @@ async function loadGallery() {
     container.appendChild(createCardElement({ url, index, hasDetail, detailUrl }));
   };
 
-  // Запускаем все проверки параллельно
   const promises = [];
 
-  // Основная галерея: base, a, b, c
   for (let i = 1; i <= 200; i++) {
     promises.push(processItem(`${galleryPath}${i}.jpg`, 'base', i));
     promises.push(processItem(`${galleryPath}${i}a.jpg`, 'a', i));
@@ -337,7 +325,6 @@ async function loadGallery() {
     promises.push(processItem(`${galleryPath}${i}c.jpg`, 'c', i));
   }
 
-  // Серии p, a, w
   for (let i = 1; i <= 100; i++) {
     promises.push(processItem(`${galleryPath}p${i}.jpg`, 'series_p', i));
     promises.push(processItem(`${galleryPath}a${i}.jpg`, 'series_a', i));
