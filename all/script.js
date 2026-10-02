@@ -38,6 +38,9 @@ let showCrystalOnNextClick = false;
 let isBattleModeActive = false;
 let botInitialized = false;
 
+// Токен для отмены устаревших загрузок галереи
+let galleryLoadToken = 0;
+
 // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ПРОВЕРКИ СУЩЕСТВОВАНИЯ ФАЙЛА ==========
 function fileExists(url) {
   return new Promise((resolve) => {
@@ -219,7 +222,7 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (БЫСТРАЯ, ПАРАЛЛЕЛЬНАЯ, С СОХРАНЕНИЕМ ПОРЯДКА) ==========
+// ========== ГАЛЕРЕЯ (БЫСТРАЯ, ПАРАЛЛЕЛЬНАЯ, БЕЗ ДУБЛЕЙ) ==========
 
 function createCardElement(item) {
   const cardDiv = document.createElement('div');
@@ -264,103 +267,88 @@ async function loadGallery() {
     return;
   }
 
-  console.log('Загрузка галереи (быстрая)...');
+  // Токен для отмены предыдущих загрузок (защита от дублей при повторном открытии)
+  const token = ++galleryLoadToken;
+
+  console.log('Загрузка галереи (быстрая, параллельная)...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
   wGallery.innerHTML = '';
 
   const galleryPath = 'gallery/';
+  
+  // Set для дедупликации URL
+  const seenUrls = new Set();
 
-  // Собираем все элементы
-  const allItems = [];
+  // Функция обработки одной карты
+  const processItem = async (url, type, index) => {
+    // Проверка токена (если галерея была перезагружена — прекращаем)
+    if (token !== galleryLoadToken) return;
+    
+    // Дедупликация
+    if (seenUrls.has(url)) return;
+    seenUrls.add(url);
 
-  // Основная галерея
-  for (let i = 1; i <= 200; i++) {
-    allItems.push({ url: `${galleryPath}${i}.jpg`, type: 'base', index: i });
-    allItems.push({ url: `${galleryPath}${i}a.jpg`, type: 'a', index: i });
-    allItems.push({ url: `${galleryPath}${i}b.jpg`, type: 'b', index: i });
-    allItems.push({ url: `${galleryPath}${i}c.jpg`, type: 'c', index: i });
-  }
+    const exists = await fileExists(url);
+    if (!exists || token !== galleryLoadToken) return;
 
-  // Серии
-  const seriesConfigs = [
-    { prefix: 'p', max: 100, format: 'jpg', spaced: false },
-    { prefix: 'a', max: 100, format: 'jpg', spaced: false },
-    { prefix: 'w', max: 100, format: 'png', spaced: true }
-  ];
-
-  for (let s of seriesConfigs) {
-    for (let i = 1; i <= s.max; i++) {
-      let url;
-      if (s.spaced) {
-        url = `${galleryPath}${s.prefix} (${i}).${s.format}`;
-      } else {
-        url = `${galleryPath}${s.prefix}${i}.${s.format}`;
-      }
-      allItems.push({ url, type: `series_${s.prefix}`, index: i });
-    }
-  }
-
-  // Параллельно проверяем существование всех файлов
-  const checkPromises = allItems.map(item => 
-    fileExists(item.url).then(exists => ({ ...item, exists }))
-  );
-  const results = await Promise.all(checkPromises);
-  const existing = results.filter(r => r.exists);
-
-  // Параллельно проверяем детали для существующих
-  const detailPromises = existing.map(item => {
+    // Определяем URL детальной версии
     let detailUrl;
-    if (item.type === 'series_w') {
-      detailUrl = item.url.replace(/w \((\d+)\)\.png$/, (m, num) => `dw (${num}).png`);
-    } else if (item.type === 'series_p') {
-      detailUrl = item.url.replace(/p(\d+)\.jpg$/, (m, num) => `dp${num}.jpg`);
-    } else if (item.type === 'series_a') {
-      detailUrl = item.url.replace(/a(\d+)\.jpg$/, (m, num) => `da${num}.jpg`);
+    if (type === 'series_w') {
+      detailUrl = url.replace(/w \((\d+)\)\.png$/, (m, num) => `dw (${num}).png`);
+    } else if (type === 'series_p') {
+      detailUrl = url.replace(/p(\d+)\.jpg$/, (m, num) => `dp${num}.jpg`);
+    } else if (type === 'series_a') {
+      detailUrl = url.replace(/a(\d+)\.jpg$/, (m, num) => `da${num}.jpg`);
     } else {
-      detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (m, num, letter) => `d${num}${letter}.jpg`);
+      detailUrl = url.replace(/(\d+)([a-c]?)\.jpg$/, (m, num, letter) => `d${num}${letter}.jpg`);
     }
-    return fileExists(detailUrl).then(hasDetail => ({ ...item, detailUrl, hasDetail }));
-  });
-  const itemsWithDetail = await Promise.all(detailPromises);
 
-  // Группируем по типу и добавляем в DOM в правильном порядке
-  const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
-  const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
-  const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
-  const cItems = itemsWithDetail.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
+    const hasDetail = await fileExists(detailUrl);
+    if (token !== galleryLoadToken) return;
 
-  const mainFragment = document.createDocumentFragment();
+    // Определяем контейнер
+    let container;
+    if (type === 'base' || type === 'a' || type === 'b' || type === 'c') {
+      container = mainGallery;
+    } else if (type === 'series_p') {
+      container = pGallery;
+    } else if (type === 'series_a') {
+      container = aGallery;
+    } else if (type === 'series_w') {
+      container = wGallery;
+    }
+
+    container.appendChild(createCardElement({ url, index, hasDetail, detailUrl }));
+  };
+
+  // Запускаем все проверки параллельно
+  const promises = [];
+
+  // Основная галерея: base, a, b, c
   for (let i = 1; i <= 200; i++) {
-    const base = baseItems.find(r => r.index === i);
-    if (base) mainFragment.appendChild(createCardElement(base));
-    const a = aItems.find(r => r.index === i);
-    if (a) mainFragment.appendChild(createCardElement(a));
-    const b = bItems.find(r => r.index === i);
-    if (b) mainFragment.appendChild(createCardElement(b));
-    const c = cItems.find(r => r.index === i);
-    if (c) mainFragment.appendChild(createCardElement(c));
+    promises.push(processItem(`${galleryPath}${i}.jpg`, 'base', i));
+    promises.push(processItem(`${galleryPath}${i}a.jpg`, 'a', i));
+    promises.push(processItem(`${galleryPath}${i}b.jpg`, 'b', i));
+    promises.push(processItem(`${galleryPath}${i}c.jpg`, 'c', i));
   }
-  mainGallery.appendChild(mainFragment);
 
-  // Серии
-  for (let s of seriesConfigs) {
-    const container = s.prefix === 'p' ? pGallery : (s.prefix === 'a' ? aGallery : wGallery);
-    const seriesItems = itemsWithDetail
-      .filter(r => r.type === `series_${s.prefix}`)
-      .sort((a, b) => a.index - b.index);
-    const frag = document.createDocumentFragment();
-    for (let item of seriesItems) {
-      frag.appendChild(createCardElement(item));
+  // Серии p, a, w
+  for (let i = 1; i <= 100; i++) {
+    promises.push(processItem(`${galleryPath}p${i}.jpg`, 'series_p', i));
+    promises.push(processItem(`${galleryPath}a${i}.jpg`, 'series_a', i));
+    promises.push(processItem(`${galleryPath}w (${i}).png`, 'series_w', i));
+  }
+
+  await Promise.all(promises);
+
+  if (token === galleryLoadToken) {
+    console.log('Галерея загружена');
+    if (pendingHash && pendingHash.startsWith('#gallery-')) {
+      handleDeepLink(pendingHash);
+      pendingHash = null;
     }
-    container.appendChild(frag);
-  }
-
-  console.log('Галерея загружена');
-  if (pendingHash && pendingHash.startsWith('#gallery-')) {
-    handleDeepLink(pendingHash);
-    pendingHash = null;
   }
 }
 
