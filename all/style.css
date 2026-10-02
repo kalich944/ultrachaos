@@ -178,7 +178,6 @@ body {
   touch-action: none;
 }
 
-/* bot-open поверх переключателя */
 #bot-opening {
   position: absolute;
   width: 100%;
@@ -204,7 +203,6 @@ body {
   transition: top 0.25s ease;
 }
 
-/* Режим боя: кристалл по центру вертикально */
 #bot-crystal.battle-mode {
   top: 50%;
   transform: translate(-50%, -50%);
@@ -223,7 +221,6 @@ body {
   pointer-events: none;
 }
 
-/* Переключатель режимов боя */
 #battleToggle {
   position: absolute;
   bottom: 0;
@@ -256,12 +253,12 @@ body {
   margin-bottom: 10px;
 }
 
-/* Сетка для основной галереи, p и a */
+/* Сетка для основной галереи, p и a — с боковыми отступами, равными gap */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  padding: 0;
+  padding: 0 10px;
   margin-bottom: 10px;
   background-color: #ffffff;
 }
@@ -272,7 +269,7 @@ body {
   cursor: pointer;
 }
 
-/* Галерея оружия – вертикальный список на всю ширину, без зазоров */
+/* Галерея оружия – вертикальный список, с боковыми отступами */
 #w-gallery {
   display: flex;
   flex-direction: column;
@@ -280,9 +277,10 @@ body {
   width: 100%;
   background-color: #ffffff;
   margin: 0;
-  padding: 0;
+  padding: 0 10px;
   line-height: 0;
   font-size: 0;
+  box-sizing: border-box;
 }
 
 #w-gallery > div {
@@ -298,6 +296,7 @@ body {
   display: block;
   margin: 0;
   padding: 0;
+  cursor: pointer;
 }
 
 /* Полноэкранный режим */
