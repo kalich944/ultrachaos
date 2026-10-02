@@ -219,25 +219,26 @@ function loadImages(container, baseName, startNumber = 1, clickMap = null) {
   loadNext();
 }
 
-// ========== ГАЛЕРЕЯ (с постепенной загрузкой и исправленными деталями для p и a) ==========
-function addCardWithCorner(container, imageUrl, detailUrl, alt) {
+// ========== ГАЛЕРЕЯ (БЫСТРАЯ, ПАРАЛЛЕЛЬНАЯ, С СОХРАНЕНИЕМ ПОРЯДКА) ==========
+
+function createCardElement(item) {
   const cardDiv = document.createElement('div');
   cardDiv.style.position = 'relative';
   cardDiv.style.display = 'inline-block';
   cardDiv.style.width = '100%';
 
   const img = document.createElement('img');
-  img.src = imageUrl;
-  img.alt = alt;
+  img.src = item.url;
+  img.alt = `Карта ${item.index}`;
   img.className = 'card-image';
   img.style.width = '100%';
   img.style.height = 'auto';
   img.style.display = 'block';
 
-  if (detailUrl) {
+  if (item.hasDetail) {
     img.style.cursor = 'pointer';
     img.addEventListener('click', () => {
-      fullscreenImg.src = detailUrl;
+      fullscreenImg.src = item.detailUrl;
       fullscreen.classList.remove('hidden');
     });
 
@@ -254,7 +255,7 @@ function addCardWithCorner(container, imageUrl, detailUrl, alt) {
   }
 
   cardDiv.appendChild(img);
-  container.appendChild(cardDiv);
+  return cardDiv;
 }
 
 async function loadGallery() {
@@ -263,7 +264,7 @@ async function loadGallery() {
     return;
   }
 
-  console.log('Загрузка галереи (постепенная)...');
+  console.log('Загрузка галереи (быстрая)...');
   mainGallery.innerHTML = '';
   pGallery.innerHTML = '';
   aGallery.innerHTML = '';
@@ -271,9 +272,10 @@ async function loadGallery() {
 
   const galleryPath = 'gallery/';
 
-  // Определяем все возможные URL для проверки
+  // Собираем все элементы
   const allItems = [];
-  // Основная галерея (1.jpg, 1a.jpg, 1b.jpg, 1c.jpg, ...)
+
+  // Основная галерея
   for (let i = 1; i <= 200; i++) {
     allItems.push({ url: `${galleryPath}${i}.jpg`, type: 'base', index: i });
     allItems.push({ url: `${galleryPath}${i}a.jpg`, type: 'a', index: i });
@@ -281,11 +283,11 @@ async function loadGallery() {
     allItems.push({ url: `${galleryPath}${i}c.jpg`, type: 'c', index: i });
   }
 
-  // Серии p, a (старый формат) и w (новый формат с пробелом)
+  // Серии
   const seriesConfigs = [
-    { prefix: 'p', gallery: pGallery, max: 100, format: 'jpg', spaced: false },
-    { prefix: 'a', gallery: aGallery, max: 100, format: 'jpg', spaced: false },
-    { prefix: 'w', gallery: wGallery, max: 100, format: 'png', spaced: true }
+    { prefix: 'p', max: 100, format: 'jpg', spaced: false },
+    { prefix: 'a', max: 100, format: 'jpg', spaced: false },
+    { prefix: 'w', max: 100, format: 'png', spaced: true }
   ];
 
   for (let s of seriesConfigs) {
@@ -300,54 +302,62 @@ async function loadGallery() {
     }
   }
 
-  // Функция проверки файла и добавления (если существует)
-  const processItem = async (item) => {
-    const exists = await fileExists(item.url);
-    if (!exists) return;
+  // Параллельно проверяем существование всех файлов
+  const checkPromises = allItems.map(item => 
+    fileExists(item.url).then(exists => ({ ...item, exists }))
+  );
+  const results = await Promise.all(checkPromises);
+  const existing = results.filter(r => r.exists);
 
-    // Определяем деталь
+  // Параллельно проверяем детали для существующих
+  const detailPromises = existing.map(item => {
     let detailUrl;
     if (item.type === 'series_w') {
-      detailUrl = item.url.replace(/w \((\d+)\)\.png$/, (match, num) => `dw (${num}).png`);
+      detailUrl = item.url.replace(/w \((\d+)\)\.png$/, (m, num) => `dw (${num}).png`);
     } else if (item.type === 'series_p') {
-      // Для p деталь: dp{номер}.jpg
-      detailUrl = item.url.replace(/p(\d+)\.jpg$/, (match, num) => `dp${num}.jpg`);
+      detailUrl = item.url.replace(/p(\d+)\.jpg$/, (m, num) => `dp${num}.jpg`);
     } else if (item.type === 'series_a') {
-      // Для a деталь: da{номер}.jpg
-      detailUrl = item.url.replace(/a(\d+)\.jpg$/, (match, num) => `da${num}.jpg`);
+      detailUrl = item.url.replace(/a(\d+)\.jpg$/, (m, num) => `da${num}.jpg`);
     } else {
-      // Для основных (base, a, b, c) деталь: d{номер}{буква}.jpg
-      detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (match, num, letter) => {
-        return `d${num}${letter}.jpg`;
-      });
+      detailUrl = item.url.replace(/(\d+)([a-c]?)\.jpg$/, (m, num, letter) => `d${num}${letter}.jpg`);
     }
+    return fileExists(detailUrl).then(hasDetail => ({ ...item, detailUrl, hasDetail }));
+  });
+  const itemsWithDetail = await Promise.all(detailPromises);
 
-    const hasDetail = await fileExists(detailUrl);
-    
-    // Определяем контейнер
-    let container;
-    if (item.type === 'base' || item.type === 'a' || item.type === 'b' || item.type === 'c') {
-      container = mainGallery;
-    } else if (item.type === 'series_p') {
-      container = pGallery;
-    } else if (item.type === 'series_a') {
-      container = aGallery;
-    } else if (item.type === 'series_w') {
-      container = wGallery;
+  // Группируем по типу и добавляем в DOM в правильном порядке
+  const baseItems = itemsWithDetail.filter(r => r.type === 'base').sort((a, b) => a.index - b.index);
+  const aItems = itemsWithDetail.filter(r => r.type === 'a').sort((a, b) => a.index - b.index);
+  const bItems = itemsWithDetail.filter(r => r.type === 'b').sort((a, b) => a.index - b.index);
+  const cItems = itemsWithDetail.filter(r => r.type === 'c').sort((a, b) => a.index - b.index);
+
+  const mainFragment = document.createDocumentFragment();
+  for (let i = 1; i <= 200; i++) {
+    const base = baseItems.find(r => r.index === i);
+    if (base) mainFragment.appendChild(createCardElement(base));
+    const a = aItems.find(r => r.index === i);
+    if (a) mainFragment.appendChild(createCardElement(a));
+    const b = bItems.find(r => r.index === i);
+    if (b) mainFragment.appendChild(createCardElement(b));
+    const c = cItems.find(r => r.index === i);
+    if (c) mainFragment.appendChild(createCardElement(c));
+  }
+  mainGallery.appendChild(mainFragment);
+
+  // Серии
+  for (let s of seriesConfigs) {
+    const container = s.prefix === 'p' ? pGallery : (s.prefix === 'a' ? aGallery : wGallery);
+    const seriesItems = itemsWithDetail
+      .filter(r => r.type === `series_${s.prefix}`)
+      .sort((a, b) => a.index - b.index);
+    const frag = document.createDocumentFragment();
+    for (let item of seriesItems) {
+      frag.appendChild(createCardElement(item));
     }
-
-    // Добавляем карту
-    addCardWithCorner(container, item.url, hasDetail ? detailUrl : null, `Карта ${item.index}`);
-  };
-
-  // Обрабатываем все элементы, но добавляем их по мере завершения, а не после всех
-  // Для сохранения порядка обрабатываем последовательно, но ожидание только для каждого элемента
-  // Это даст эффект постепенного появления
-  for (let item of allItems) {
-    await processItem(item);
+    container.appendChild(frag);
   }
 
-  console.log('Галерея загружена (постепенная)');
+  console.log('Галерея загружена');
   if (pendingHash && pendingHash.startsWith('#gallery-')) {
     handleDeepLink(pendingHash);
     pendingHash = null;
