@@ -238,13 +238,16 @@ function createCardElement(item) {
   img.style.height = 'auto';
   img.style.display = 'block';
 
-  if (item.hasDetail) {
-    img.style.cursor = 'pointer';
-    img.addEventListener('click', () => {
-      fullscreenImg.src = item.detailUrl;
-      fullscreen.classList.remove('hidden');
-    });
+  // Клик по карте открывает полноэкранный режим:
+  // если есть детальная версия — показываем её, иначе — саму карту
+  img.style.cursor = 'pointer';
+  img.addEventListener('click', () => {
+    fullscreenImg.src = item.hasDetail ? item.detailUrl : item.url;
+    fullscreen.classList.remove('hidden');
+  });
 
+  // Уголок добавляем только если есть детальная версия
+  if (item.hasDetail) {
     const cornerImg = document.createElement('img');
     cornerImg.src = 'gallery/corner.jpg';
     cornerImg.alt = 'подробности';
@@ -277,7 +280,7 @@ async function loadGallery() {
   wGallery.innerHTML = '';
 
   const galleryPath = 'gallery/';
-  
+
   // Set для дедупликации URL
   const seenUrls = new Set();
 
@@ -285,7 +288,7 @@ async function loadGallery() {
   const processItem = async (url, type, index) => {
     // Проверка токена (если галерея была перезагружена — прекращаем)
     if (token !== galleryLoadToken) return;
-    
+
     // Дедупликация
     if (seenUrls.has(url)) return;
     seenUrls.add(url);
@@ -512,7 +515,7 @@ function handleBotClick() {
 // Переключение режимов боя
 battleToggle.addEventListener('click', function(e) {
   e.stopPropagation();
-  
+
   if (isBattleModeActive) {
     this.src = 'battle1.png';
     botOption.style.display = 'block';
